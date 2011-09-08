@@ -10,6 +10,8 @@
 !define MUI_ICON "ocaml-icon.ico"
 
 !include "MUI2.nsh"
+!include "LogicLib.nsh"
+!include "EnvVarUpdate.nsh"
 
 Name "OCaml"
 OutFile "OCaml Setup.exe"
@@ -33,15 +35,29 @@ Section "OCaml" SecOcaml
 
   SetOutPath "$INSTDIR"
 
-  WriteRegStr HKLM "Software\OCaml" "" $INSTDIR
-
-  
+  File ocaml-icon.ico
   File c:\ocamlmgw\Changes.txt
-  File c:\ocamlmgw\License.txt
-  File c:\ocamlmgw\OCamlWin.exe
-  File /r c:\ocamlmgw\bin
-  File /r c:\ocamlmgw\lib
-  File /r c:\ocamlmgw\man
+  ;File c:\ocamlmgw\License.txt
+  ;File c:\ocamlmgw\OCamlWin.exe
+  ;File /r c:\ocamlmgw\bin
+  ;File /r c:\ocamlmgw\lib
+  ;File /r c:\ocamlmgw\man
+  
+  WriteRegStr SHCTX "Software\OCaml" "" $INSTDIR
+  ; We want to overwrite that one anyway for the new setup to work properly.
+  WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "OCAMLLIB" "$INSTDIR\lib"
+  ${EnvVarUpdate} $0 "PATH" "P" "HKLM" "$INSTDIR\bin"
+
+  FileOpen $0 "$INSTDIR\ld.conf" w
+  FileWrite $0 "$INSTDIR\lib"
+  FileClose $0
+
+  WriteRegExpandStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml" "UninstallString" "$INSTDIR\uninstall.exe"
+  WriteRegExpandStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml" "InstallLocation" "$INSTDIR"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml" "DisplayName" "OCaml"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml" "DisplayIcon" "$INSTDIR\ocaml-icon.ico"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml" "DisplayVersion" "${MUI_VERSION}"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml" "Publisher" "Inria"
 
   WriteUninstaller $INSTDIR\uninstall.exe
 
@@ -55,10 +71,22 @@ Section "Uninstall"
 
   ; The rationale is that idiots^W users might install this in their Program
   ; Files directory, so we can't blindy remove the INSTDIR...
+  Delete "$INSTDIR\ocaml-icon.ico"
   Delete "$INSTDIR\uninstall.exe"
-  !include uninstall_lines.nsi
+  ;!include uninstall_lines.nsi
+  Delete "$INSTDIR\Changes.txt" ; just for debug...
   RMDir "$INSTDIR"
 
-  DeleteRegKey /ifempty HKLM "Software\OCaml"
+  ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\bin"
+  ; Using EnvVarUpdate makes sure we do *not* alter OCAMLLIB in case it has
+  ; changed in the meanwhile.
+  ${un.EnvVarUpdate} $0 "OCAMLLIB" "R" "HKLM" "$INSTDIR\lib"
+  ; Same logic, without using the wrapper above.
+  ReadRegStr $1 SHCTX "SOFTWARE\OCaml" ""
+  ${Unless} $1 != $INSTDIR
+    DeleteRegKey /ifempty SHCTX "SOFTWARE\OCaml"
+  ${EndUnless}
+
+  DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml"
 
 SectionEnd

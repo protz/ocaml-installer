@@ -31,11 +31,11 @@ let _ =
   in
   let install_lines = List.map get_install_line items in
   let uninstall_lines = List.map get_uninstall_line (List.rev items) in
-  let i_f = open_out "install_lines.nis" in
+  let i_f = open_out "install_lines.nsi" in
   output_string i_f (String.concat "\n" install_lines);
   output_string i_f "\n";
   close_out i_f;
-  let u_f = open_out "uninstall_lines.nis" in
+  let u_f = open_out "uninstall_lines.nsi" in
   output_string u_f (String.concat "\n" uninstall_lines);
   output_string u_f "\n";
   close_out u_f;

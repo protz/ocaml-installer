@@ -56,7 +56,7 @@ Section "Uninstall"
   ; The rationale is that idiots^W users might install this in their Program
   ; Files directory, so we can't blindy remove the INSTDIR...
   Delete "$INSTDIR\uninstall.exe"
-  !include uninstall_lines.nis
+  !include uninstall_lines.nsi
   RMDir "$INSTDIR"
 
   DeleteRegKey /ifempty HKLM "Software\OCaml"

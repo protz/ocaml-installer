@@ -89,7 +89,7 @@ Section "OCaml" SecOCaml
 
 SectionEnd
 
-Section "ActiveTcl ${ACTIVETCL_VERSION}"
+Section "ActiveTcl ${ACTIVETCL_VERSION}" SecActiveTcl
 
   ReadRegStr $1 HKLM "SOFTWARE\ActiveState\ActiveTcl" "CurrentVersion"
   
@@ -98,14 +98,10 @@ Section "ActiveTcl ${ACTIVETCL_VERSION}"
   ${EndIf}
   
 
-  !define MUI_PAGE_HEADER_TEXT "test header"
-
   SetOutPath "$INSTDIR"
 
-  File /r curl
-
-  ExecWait "$INSTDIR\curl\curl.exe ${ACTIVETCL_URL} -o $\"$INSTDIR\activetcl.exe$\""
-  ExecWait "$INSTDIR\activetcl.exe"
+  NSISdl::download ${ACTIVETCL_URL} "$TEMP\activetcl.exe"
+  ExecWait "$TEMP\activetcl.exe"
   
   end:
 
@@ -119,12 +115,11 @@ Section "Uninstall"
 
   ; The rationale is that idiots^W users might install this in their Program
   ; Files directory, so we can't blindy remove the INSTDIR...
-  RMDir /r "$INSTDIR\curl"
   Delete "$INSTDIR\bin\flexlink.exe"
   Delete "$INSTDIR\bin\flexdll_initer_mingw.o"
   Delete "$INSTDIR\bin\flexdll_mingw.o"
   RMDir "$INSTDIR\bin"
-  Delete "$INSTDIR\activetcl.exe"
+
   Delete "$INSTDIR\ld.conf"
   Delete "$INSTDIR\ocaml-icon.ico"
   Delete "$INSTDIR\uninstall.exe"

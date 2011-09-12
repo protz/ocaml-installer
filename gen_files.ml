@@ -29,12 +29,12 @@ let _ =
     | (Unix.S_DIR, name) ->
         Printf.sprintf "RMDir \"%s\"" name
   in
-  let install_lines = List.map get_install_line items in
-  let uninstall_lines = List.map get_uninstall_line (List.rev items) in
+  (*let install_lines = List.map get_install_line items in
   let i_f = open_out "install_lines.nsi" in
   output_string i_f (String.concat "\n" install_lines);
   output_string i_f "\n";
-  close_out i_f;
+  close_out i_f;*)
+  let uninstall_lines = List.map get_uninstall_line (List.rev items) in
   let u_f = open_out "uninstall_lines.nsi" in
   output_string u_f (String.concat "\n" uninstall_lines);
   output_string u_f "\n";

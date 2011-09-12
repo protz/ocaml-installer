@@ -5,10 +5,13 @@
 
 ; -------------
 !define MUI_PRODUCT "OCaml"
-!define MUI_VERSION "3.13pre"
 !define MUI_UI_HEADERIMAGE "ocaml-icon.png"
 !define MUI_ICON "ocaml-icon.ico"
+; this must match the activetcl version ocaml was compiled against
+!define ACTIVETCL_VERSION "8.5.10.1"
 
+!include "version.nsh"
+!include "urls.nsh"
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
 !include "EnvVarUpdate.nsh"
@@ -18,9 +21,18 @@ OutFile "OCaml Setup.exe"
 InstallDir "$PROGRAMFILES32\${MUI_PRODUCT}"
 RequestExecutionLevel admin
 
+!define MUI_WELCOMEPAGE_TITLE "Welcome to the OCaml setup for windows."
+!define MUI_WELCOMEPAGE_TEXT "This wizard will install OCaml ${MUI_VERSION}, as well as required tools and libraries for it to work properly."
+!define MUI_LICENSEPAGE_TEXT_TOP "OCaml is distributed under a modified QPL license."
+!define MUI_LICENSEPAGE_TEXT_BOTTOM "You must agree with the terms of the license below before installing OCaml."
+!define MUI_COMPONENTSPAGE_TEXT_COMPLIST "Tcl/Tk is a requirement, and Emacs is recommended to have a nice toplevel. This installer can download and install both."
+
 ; -------------
 ; Generate zillions of pages to look professional
 
+  !insertmacro MUI_PAGE_WELCOME
+  ;!insertmacro MUI_PAGE_STARTMENU 
+  !insertmacro MUI_PAGE_LICENSE c:\ocamlmgw\License.txt
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
@@ -31,7 +43,19 @@ RequestExecutionLevel admin
 ; -------------
 ; Main entry point
 
-Section "OCaml" SecOcaml
+Section "OCaml" SecOCaml
+
+  ReadRegStr $1 HKLM "SOFTWARE\OCaml" ""
+  
+  ${If} $1 != ""
+    MessageBox MB_OKCANCEL "There seems to be a previous version of OCaml installed. It is strongly recommended you uninstall it before proceeding." IDCANCEL end
+  ${EndIf}
+
+  SetOutPath "$INSTDIR\bin"
+
+  File "flexlink\flexlink.exe"
+  File "flexlink\flexdll_mingw.o"
+  File "flexlink\flexdll_initer_mingw.o"
 
   SetOutPath "$INSTDIR"
 
@@ -61,6 +85,30 @@ Section "OCaml" SecOcaml
 
   WriteUninstaller $INSTDIR\uninstall.exe
 
+  end:
+
+SectionEnd
+
+Section "ActiveTcl ${ACTIVETCL_VERSION}"
+
+  ReadRegStr $1 HKLM "SOFTWARE\ActiveState\ActiveTcl" "CurrentVersion"
+  
+  ${If} $1 == ${ACTIVETCL_VERSION}
+    MessageBox MB_OKCANCEL "You already seem to have ActiveTcl ${ACTIVETCL_VERSION} installed. Download and install ActiveTcl anyway?" IDCANCEL end
+  ${EndIf}
+  
+
+  !define MUI_PAGE_HEADER_TEXT "test header"
+
+  SetOutPath "$INSTDIR"
+
+  File /r curl
+
+  ExecWait "$INSTDIR\curl\curl.exe ${ACTIVETCL_URL} -o $\"$INSTDIR\activetcl.exe$\""
+  ExecWait "$INSTDIR\activetcl.exe"
+  
+  end:
+
 SectionEnd
 
 ; -------------
@@ -71,6 +119,13 @@ Section "Uninstall"
 
   ; The rationale is that idiots^W users might install this in their Program
   ; Files directory, so we can't blindy remove the INSTDIR...
+  RMDir /r "$INSTDIR\curl"
+  Delete "$INSTDIR\bin\flexlink.exe"
+  Delete "$INSTDIR\bin\flexdll_initer_mingw.o"
+  Delete "$INSTDIR\bin\flexdll_mingw.o"
+  RMDir "$INSTDIR\bin"
+  Delete "$INSTDIR\activetcl.exe"
+  Delete "$INSTDIR\ld.conf"
   Delete "$INSTDIR\ocaml-icon.ico"
   Delete "$INSTDIR\uninstall.exe"
   ;!include uninstall_lines.nsi

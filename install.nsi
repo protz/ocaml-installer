@@ -9,9 +9,10 @@
 !define MUI_ICON "ocaml-icon.ico"
 ; this must match the activetcl version ocaml was compiled against
 !define ACTIVETCL_VERSION "8.5.10.1"
+!define ACTIVETCL_URL "http://downloads.activestate.com/ActiveTcl/releases/8.5.10.1/ActiveTcl8.5.10.1.295062-win32-ix86-threaded.exe"
+!define ROOT_DIR "c:\ocamlmgw" ; the directory where your binary dist of ocaml lives
 
 !include "version.nsh"
-!include "urls.nsh"
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
 !include "EnvVarUpdate.nsh"
@@ -32,7 +33,7 @@ RequestExecutionLevel admin
 
   !insertmacro MUI_PAGE_WELCOME
   ;!insertmacro MUI_PAGE_STARTMENU 
-  !insertmacro MUI_PAGE_LICENSE c:\ocamlmgw\License.txt
+  !insertmacro MUI_PAGE_LICENSE ${ROOT_DIR}\License.txt
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
@@ -48,7 +49,7 @@ Section "OCaml" SecOCaml
   ReadRegStr $1 SHCTX "SOFTWARE\OCaml" ""
   
   ${If} $1 != ""
-    MessageBox MB_OKCANCEL "There seems to be a previous version of OCaml installed. It is strongly recommended you uninstall it before proceeding." IDCANCEL end
+    MessageBox MB_YESNO "There seems to be a previous version of OCaml installed. It is strongly recommended you uninstall it before proceeding. Proceed anyway?" IDNO end
   ${EndIf}
 
   SetOutPath "$INSTDIR\bin"
@@ -60,12 +61,12 @@ Section "OCaml" SecOCaml
   SetOutPath "$INSTDIR"
 
   File ocaml-icon.ico
-  File c:\ocamlmgw\Changes.txt
-  ;File c:\ocamlmgw\License.txt
-  ;File c:\ocamlmgw\OCamlWin.exe
-  ;File /r c:\ocamlmgw\bin
-  ;File /r c:\ocamlmgw\lib
-  ;File /r c:\ocamlmgw\man
+  ;File ${ROOT_DIR}\Changes.txt
+  ;File ${ROOT_DIR}\License.txt
+  ;File ${ROOT_DIR}\OCamlWin.exe
+  ;File /r ${ROOT_DIR}\bin
+  ;File /r ${ROOT_DIR}\lib
+  ;File /r ${ROOT_DIR}\man
   
   WriteRegStr SHCTX "Software\OCaml" "" $INSTDIR
   ; We want to overwrite that one anyway for the new setup to work properly.
@@ -94,11 +95,9 @@ Section "ActiveTcl ${ACTIVETCL_VERSION}" SecActiveTcl
   ReadRegStr $1 HKLM "SOFTWARE\ActiveState\ActiveTcl" "CurrentVersion"
   
   ${If} $1 == ${ACTIVETCL_VERSION}
-    MessageBox MB_OKCANCEL "You already seem to have ActiveTcl ${ACTIVETCL_VERSION} installed. Download and install ActiveTcl anyway?" IDCANCEL end
+    MessageBox MB_YESNO "You already seem to have ActiveTcl ${ACTIVETCL_VERSION} installed. Download and install ActiveTcl anyway?" IDNO end
   ${EndIf}
   
-
-  SetOutPath "$INSTDIR"
 
   NSISdl::download ${ACTIVETCL_URL} "$TEMP\activetcl.exe"
   ExecWait "$TEMP\activetcl.exe"
@@ -120,18 +119,19 @@ Section "Uninstall"
   Delete "$INSTDIR\bin\flexdll_mingw.o"
   RMDir "$INSTDIR\bin"
 
-  Delete "$INSTDIR\ld.conf"
   Delete "$INSTDIR\ocaml-icon.ico"
+  Delete "$INSTDIR\Changes.txt"
+  Delete "$INSTDIR\License.txt"
+  Delete "$INSTDIR\OCamlWin.exe"
+  Delete "$INSTDIR\ld.conf"
   Delete "$INSTDIR\uninstall.exe"
-  ;!include uninstall_lines.nsi
-  Delete "$INSTDIR\Changes.txt" ; just for debug...
+  !include uninstall_lines.nsi
   RMDir "$INSTDIR"
 
   ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\bin"
   ; Using EnvVarUpdate makes sure we do *not* alter OCAMLLIB in case it has
   ; changed in the meanwhile.
   ${un.EnvVarUpdate} $0 "OCAMLLIB" "R" "HKLM" "$INSTDIR\lib"
-  ; Same logic, without using the wrapper above.
   ReadRegStr $1 SHCTX "SOFTWARE\OCaml" ""
   ${Unless} $1 != $INSTDIR
     DeleteRegKey /ifempty SHCTX "SOFTWARE\OCaml"

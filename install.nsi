@@ -45,7 +45,7 @@ RequestExecutionLevel admin
 
 Section "OCaml" SecOCaml
 
-  ReadRegStr $1 HKLM "SOFTWARE\OCaml" ""
+  ReadRegStr $1 SHCTX "SOFTWARE\OCaml" ""
   
   ${If} $1 != ""
     MessageBox MB_OKCANCEL "There seems to be a previous version of OCaml installed. It is strongly recommended you uninstall it before proceeding." IDCANCEL end

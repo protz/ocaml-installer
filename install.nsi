@@ -10,8 +10,8 @@
 ; this must match the activetcl version ocaml was compiled against
 !define ACTIVETCL_VERSION "8.5.10.1"
 !define ACTIVETCL_URL "http://downloads.activestate.com/ActiveTcl/releases/8.5.10.1/ActiveTcl8.5.10.1.295062-win32-ix86-threaded.exe"
-;!define EMACS_URL "http://ftp.gnu.org/gnu/emacs/windows/emacs-23.3-bin-i386.zip"
-!define EMACS_URL "http://yquem/~protzenk/emacs-23.3-bin-i386.zip"
+!define EMACS_URL "http://ftp.gnu.org/gnu/emacs/windows/emacs-23.3-bin-i386.zip"
+;!define EMACS_URL "http://yquem/~protzenk/emacs-23.3-bin-i386.zip"
 !define EMACS_VER "23.3"
 !define ROOT_DIR "c:\ocamlmgw" ; the directory where your binary dist of ocaml lives
 
@@ -85,9 +85,9 @@ Section "OCaml" SecOCaml
   File ${ROOT_DIR}\Changes.txt
   File ${ROOT_DIR}\License.txt
   File ${ROOT_DIR}\OCamlWin.exe
-  ;File /r ${ROOT_DIR}\bin
-  ;File /r ${ROOT_DIR}\lib
-  ;File /r ${ROOT_DIR}\man
+  File /r ${ROOT_DIR}\bin
+  File /r ${ROOT_DIR}\lib
+  File /r ${ROOT_DIR}\man
   
   WriteRegStr SHCTX "Software\OCaml" "" $INSTDIR
   ; We want to overwrite that one anyway for the new setup to work properly.

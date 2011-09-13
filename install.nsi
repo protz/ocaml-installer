@@ -30,6 +30,9 @@ RequestExecutionLevel admin
 !define MUI_LICENSEPAGE_TEXT_TOP "OCaml is distributed under a modified QPL license."
 !define MUI_LICENSEPAGE_TEXT_BOTTOM "You must agree with the terms of the license below before installing OCaml."
 !define MUI_COMPONENTSPAGE_TEXT_COMPLIST "Tcl/Tk is a requirement, and Emacs is recommended to have a nice toplevel. This installer can download and install both."
+!define MUI_FINISHPAGE_TITLE "Congratulations! You have installed OCaml"
+!define MUI_FINISHPAGE_TEXT "You can now play with OCaml. Start menu entries and desktop shortcuts have been created. You can either run OCamlWin, which is old and clunky, or run Emacs, if you chose to install it. Once in Emacs, just hit Alt-X, type run-caml, hit enter, and start playing with the toplevel. Enjoy!"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "side.bmp"
 
 ; -------------
 ; Some constants
@@ -46,9 +49,12 @@ RequestExecutionLevel admin
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
+  !insertmacro MUI_PAGE_FINISH
 
   !insertmacro MUI_UNPAGE_CONFIRM
   !insertmacro MUI_UNPAGE_INSTFILES
+
+  !insertmacro MUI_LANGUAGE "English"
 
 ; -------------
 ; Main entry point
@@ -73,9 +79,9 @@ Section "OCaml" SecOCaml
   File ${ROOT_DIR}\Changes.txt
   File ${ROOT_DIR}\License.txt
   File ${ROOT_DIR}\OCamlWin.exe
-  File /r ${ROOT_DIR}\bin
-  File /r ${ROOT_DIR}\lib
-  File /r ${ROOT_DIR}\man
+  ;File /r ${ROOT_DIR}\bin
+  ;File /r ${ROOT_DIR}\lib
+  ;File /r ${ROOT_DIR}\man
   
   WriteRegStr SHCTX "Software\OCaml" "" $INSTDIR
   ; We want to overwrite that one anyway for the new setup to work properly.
@@ -165,6 +171,16 @@ Section "Emacs ${EMACS_VER}" SecEmacs
   end:
 
 SectionEnd
+
+LangString DESC_SecOCaml ${LANG_ENGLISH} "This contains the main OCaml distribution, including all OCaml compilers, ocamlbuild, ocamldoc, ocamlbrowser, labltk, and flexlink for the mingw toolchain."
+LangString DESC_SecActiveTcl ${LANG_ENGLISH} "ActiveTcl is distributed by ActiveState and provides the graphic libraries to run ocamlbrowser, as well as your own graphical programs if you choose so."
+LangString DESC_SecEmacs ${LANG_ENGLISH} "Emacs is a text editor with excellent OCaml support. This will download Emacs from the internet, and make sure the OCaml specific scripts are properly installed."
+
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecOCaml} $(DESC_SecOCaml)
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecActiveTcl} $(DESC_SecActiveTcl)
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecEmacs} $(DESC_SecEmacs)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ; -------------
 ; The semantics are: if the section is named "Uninstall", then this is used to

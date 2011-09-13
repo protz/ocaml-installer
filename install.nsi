@@ -5,7 +5,8 @@
 
 ; -------------
 !define MUI_PRODUCT "OCaml"
-!define MUI_UI_HEADERIMAGE "ocaml-icon.png"
+!define MUI_HEADERIMAGE
+!define MUI_HEADERIMAGE_BITMAP "installer-logo.bmp"
 !define MUI_ICON "ocaml-icon.ico"
 ; this must match the activetcl version ocaml was compiled against
 !define ACTIVETCL_VERSION "8.5.10.1"

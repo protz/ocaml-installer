@@ -33,6 +33,11 @@ RequestExecutionLevel admin
 !define MUI_FINISHPAGE_TITLE "Congratulations! You have installed OCaml"
 !define MUI_FINISHPAGE_TEXT "You can now play with OCaml. Start menu entries and desktop shortcuts have been created. You can either run OCamlWin, which is old and clunky, or run Emacs, if you chose to install it. Once in Emacs, just hit Alt-X, type run-caml, hit enter, and start playing with the toplevel. Enjoy!"
 !define MUI_WELCOMEFINISHPAGE_BITMAP "side.bmp"
+!define MUI_STARTMENUPAGE_REGISTRY_ROOT "SHCTX"
+!define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\OCaml"
+!define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
+
+Var STARTMENUFOLDER
 
 ; -------------
 ; Some constants
@@ -44,7 +49,7 @@ RequestExecutionLevel admin
 ; Generate zillions of pages to look professional
 
   !insertmacro MUI_PAGE_WELCOME
-  ;!insertmacro MUI_PAGE_STARTMENU 
+  !insertmacro MUI_PAGE_STARTMENU Application $STARTMENUFOLDER
   !insertmacro MUI_PAGE_LICENSE ${ROOT_DIR}\License.txt
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
@@ -76,6 +81,7 @@ Section "OCaml" SecOCaml
   SetOutPath "$INSTDIR"
 
   File ocaml-icon.ico
+  File onlinedoc.url
   File ${ROOT_DIR}\Changes.txt
   File ${ROOT_DIR}\License.txt
   File ${ROOT_DIR}\OCamlWin.exe
@@ -98,6 +104,13 @@ Section "OCaml" SecOCaml
   WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml" "DisplayIcon" "$INSTDIR\ocaml-icon.ico"
   WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml" "DisplayVersion" "${MUI_VERSION}"
   WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml" "Publisher" "Inria"
+
+  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+    CreateDirectory "$SMPROGRAMS\$STARTMENUFOLDER"
+    CreateShortCut "$SMPROGRAMS\$STARTMENUFOLDER\OCamlWin.lnk" "$INSTDIR\OCamlWin.exe"
+    CreateShortCut "$SMPROGRAMS\$STARTMENUFOLDER\OCamlBrowser.lnk" "$INSTDIR\bin\ocamlbrowser.exe"
+    CreateShortCut "$SMPROGRAMS\$STARTMENUFOLDER\Online Documentation.lnk" "$INSTDIR\onlinedoc.url"
+  !insertmacro MUI_STARTMENU_WRITE_END
 
   WriteUninstaller $INSTDIR\uninstall.exe
 
@@ -128,20 +141,12 @@ Section "Emacs ${EMACS_VER}" SecEmacs
   ${EndIf}
 
   NSISdl::download ${EMACS_URL} "$TEMP\emacs.zip"
-  nsisunz::UnzipToStack "$TEMP\emacs.zip" "$INSTDIR"
+  nsisunz::UnzipToLog "$TEMP\emacs.zip" "$INSTDIR"
 
   Pop $0
   StrCmp $0 "success" ok
     DetailPrint "$0"
-    Goto skiplist
   ok:
-
-  next:
-    Pop $0
-    DetailPrint $0
-  StrCmp $0 "" 0 next
-
-  skiplist:
 
   ; add the caml-mode in the emacs distribution
 
@@ -167,6 +172,10 @@ Section "Emacs ${EMACS_VER}" SecEmacs
   WriteRegStr HKCR "OCaml.ml\shell\open\command" "" '$INSTDIR\emacs-${EMACS_VER}\bin\runemacs.exe "%1"'
 
   System::Call 'Shell32::SHChangeNotify(i ${SHCNE_ASSOCCHANGED}, i ${SHCNF_IDLIST}, i 0, i 0)'
+
+  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+    CreateShortCut "$SMPROGRAMS\$STARTMENUFOLDER\Emacs.lnk" "$INSTDIR\emacs-${EMACS_VER}\bin\runemacs.exe"
+  !insertmacro MUI_STARTMENU_WRITE_END
 
   end:
 
@@ -218,6 +227,7 @@ Section "Uninstall"
   RMDir "$INSTDIR\bin"
 
   Delete "$INSTDIR\ocaml-icon.ico"
+  Delete "$INSTDIR\onlinedoc.url"
   Delete "$INSTDIR\Changes.txt"
   Delete "$INSTDIR\License.txt"
   Delete "$INSTDIR\OCamlWin.exe"
@@ -225,6 +235,13 @@ Section "Uninstall"
   Delete "$INSTDIR\uninstall.exe"
   !include uninstall_lines.nsi
   RMDir "$INSTDIR"
+
+  !insertmacro MUI_STARTMENU_GETFOLDER Application $STARTMENUFOLDER
+  Delete "$SMPROGRAMS\$STARTMENUFOLDER\OCamlWin.lnk"
+  Delete "$SMPROGRAMS\$STARTMENUFOLDER\OCamlBrowser.lnk"
+  Delete "$SMPROGRAMS\$STARTMENUFOLDER\Emacs.lnk"
+  Delete "$SMPROGRAMS\$STARTMENUFOLDER\Online Documentation.lnk"
+  RMDir "$SMPROGRAMS\$STARTMENUFOLDER"
 
   ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\bin"
   ; Using EnvVarUpdate makes sure we do *not* alter OCAMLLIB in case it has

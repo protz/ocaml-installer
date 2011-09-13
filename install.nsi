@@ -10,6 +10,9 @@
 ; this must match the activetcl version ocaml was compiled against
 !define ACTIVETCL_VERSION "8.5.10.1"
 !define ACTIVETCL_URL "http://downloads.activestate.com/ActiveTcl/releases/8.5.10.1/ActiveTcl8.5.10.1.295062-win32-ix86-threaded.exe"
+;!define EMACS_URL "http://ftp.gnu.org/gnu/emacs/windows/emacs-23.3-bin-i386.zip"
+!define EMACS_URL "http://yquem/~protzenk/emacs-23.3-bin-i386.zip"
+!define EMACS_VER "23.3"
 !define ROOT_DIR "c:\ocamlmgw" ; the directory where your binary dist of ocaml lives
 
 !include "version.nsh"
@@ -18,7 +21,7 @@
 !include "EnvVarUpdate.nsh"
 
 Name "OCaml"
-OutFile "OCaml Setup.exe"
+OutFile "ocaml-${MUI_VERSION}-mingw32.exe"
 InstallDir "$PROGRAMFILES32\${MUI_PRODUCT}"
 RequestExecutionLevel admin
 
@@ -27,6 +30,12 @@ RequestExecutionLevel admin
 !define MUI_LICENSEPAGE_TEXT_TOP "OCaml is distributed under a modified QPL license."
 !define MUI_LICENSEPAGE_TEXT_BOTTOM "You must agree with the terms of the license below before installing OCaml."
 !define MUI_COMPONENTSPAGE_TEXT_COMPLIST "Tcl/Tk is a requirement, and Emacs is recommended to have a nice toplevel. This installer can download and install both."
+
+; -------------
+; Some constants
+
+!define SHCNE_ASSOCCHANGED 0x8000000
+!define SHCNF_IDLIST 0
 
 ; -------------
 ; Generate zillions of pages to look professional
@@ -61,12 +70,12 @@ Section "OCaml" SecOCaml
   SetOutPath "$INSTDIR"
 
   File ocaml-icon.ico
-  ;File ${ROOT_DIR}\Changes.txt
-  ;File ${ROOT_DIR}\License.txt
-  ;File ${ROOT_DIR}\OCamlWin.exe
-  ;File /r ${ROOT_DIR}\bin
-  ;File /r ${ROOT_DIR}\lib
-  ;File /r ${ROOT_DIR}\man
+  File ${ROOT_DIR}\Changes.txt
+  File ${ROOT_DIR}\License.txt
+  File ${ROOT_DIR}\OCamlWin.exe
+  File /r ${ROOT_DIR}\bin
+  File /r ${ROOT_DIR}\lib
+  File /r ${ROOT_DIR}\man
   
   WriteRegStr SHCTX "Software\OCaml" "" $INSTDIR
   ; We want to overwrite that one anyway for the new setup to work properly.
@@ -106,11 +115,84 @@ Section "ActiveTcl ${ACTIVETCL_VERSION}" SecActiveTcl
 
 SectionEnd
 
+Section "Emacs ${EMACS_VER}" SecEmacs
+
+  ${If} ${FileExists} "$INSTDIR\emacs-${EMACS_VER}"
+    MessageBox MB_YESNO "There seems to be an Emacs living in that directory already... overwrite?" IDNO end
+  ${EndIf}
+
+  NSISdl::download ${EMACS_URL} "$TEMP\emacs.zip"
+  nsisunz::UnzipToStack "$TEMP\emacs.zip" "$INSTDIR"
+
+  Pop $0
+  StrCmp $0 "success" ok
+    DetailPrint "$0"
+    Goto skiplist
+  ok:
+
+  next:
+    Pop $0
+    DetailPrint $0
+  StrCmp $0 "" 0 next
+
+  skiplist:
+
+  ; add the caml-mode in the emacs distribution
+
+  SetOutPath "$INSTDIR\emacs-${EMACS_VER}\site-lisp\caml-mode"
+  File ${ROOT_DIR}\emacsfiles\*
+  SetOutPath "$INSTDIR\emacs-${EMACS_VER}\site-lisp"
+  File site-start.el
+
+  ; register file types, add emacs bin directory to the path
+
+  ${EnvVarUpdate} $0 "PATH" "P" "HKLM" "$INSTDIR\emacs-${EMACS_VER}\bin"
+
+  WriteRegStr HKCR ".mli" "" "OCaml.mli"
+  WriteRegStr HKCR "OCaml.mli" "" "OCaml Interface File"
+  WriteRegStr HKCR "OCaml.mli\DefaultIcon" "" "$INSTDIR\ocaml-icon.ico"
+  WriteRegStr HKCR "OCaml.mli\shell" "" "open"
+  WriteRegStr HKCR "OCaml.mli\shell\open\command" "" '$INSTDIR\emacs-${EMACS_VER}\bin\runemacs.exe "%1"'
+
+  WriteRegStr HKCR ".ml" "" "OCaml.ml"
+  WriteRegStr HKCR "OCaml.ml" "" "OCaml Implementation File"
+  WriteRegStr HKCR "OCaml.ml\DefaultIcon" "" "$INSTDIR\ocaml-icon.ico"
+  WriteRegStr HKCR "OCaml.ml\shell" "" "open"
+  WriteRegStr HKCR "OCaml.ml\shell\open\command" "" '$INSTDIR\emacs-${EMACS_VER}\bin\runemacs.exe "%1"'
+
+  System::Call 'Shell32::SHChangeNotify(i ${SHCNE_ASSOCCHANGED}, i ${SHCNF_IDLIST}, i 0, i 0)'
+
+  end:
+
+SectionEnd
+
 ; -------------
 ; The semantics are: if the section is named "Uninstall", then this is used to
 ; generate the uninstaller
 
 Section "Uninstall"
+
+  ${If} ${FileExists} "$INSTDIR\emacs-${EMACS_VER}"
+    MessageBox MB_YESNO "Also uninstall Emacs ${EMACS_VER}?" IDNO next
+
+    ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\emacs-${EMACS_VER}\bin"
+    RMDir /r "$INSTDIR\emacs-${EMACS_VER}"
+
+    ReadRegStr $R0 HKCR ".mli" ""
+    StrCmp $R0 "OCaml.mli" 0 +2
+      DeleteRegKey HKCR ".mli"
+
+    ReadRegStr $R0 HKCR ".ml" ""
+    StrCmp $R0 "OCaml.ml" 0 +2
+      DeleteRegKey HKCR ".ml"
+
+    DeleteRegKey HKCR "OCaml.ml"
+    DeleteRegKey HKCR "OCaml.mli"
+
+    System::Call 'Shell32::SHChangeNotify(i ${SHCNE_ASSOCCHANGED}, i ${SHCNF_IDLIST}, i 0, i 0)'
+  ${EndIf}
+
+  next:
 
   ; The rationale is that idiots^W users might install this in their Program
   ; Files directory, so we can't blindy remove the INSTDIR...

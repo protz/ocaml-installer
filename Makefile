@@ -2,7 +2,7 @@ NSIS=/c/Program\ Files\ \(x86\)/NSIS/makensisw.exe
 SCRIPT=install.nsi
 OCAMLROOT=/c/ocamlmgw
 
-all: util
+all: util version
 	$(NSIS) $(SCRIPT)
 
 # Regenerate if gen_files.ml changed or there's a new ocaml version (and
@@ -13,4 +13,4 @@ util: gen_files.ml $(OCAMLROOT)/bin/ocaml.exe
 	./gen_files.byte $(OCAMLROOT)
 
 version: $(OCAMLROOT)/bin/ocaml.exe 
-	$(shell echo "!define MUI_VERSION \""`ocaml -version | sed 's/.*version \([^ ]\+\).*/\1/g'`"\"" > version.nsh)
+	$(shell echo "!define MUI_VERSION \""`$(OCAMLROOT)/bin/ocaml.exe -version | sed 's/.*version \([^ ]\+\).*/\1/g'`"\"" > version.nsh)

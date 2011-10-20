@@ -110,8 +110,12 @@ Section "OCaml" SecOCaml
   WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "OCAMLLIB" "$INSTDIR\lib"
   ${EnvVarUpdate} $0 "PATH" "P" "HKLM" "$INSTDIR\bin"
 
-  FileOpen $0 "$INSTDIR\ld.conf" w
-  FileWrite $0 "$INSTDIR\lib"
+  ; There's already a file like that in the original directory, so remove it,
+  ; and write the correct values
+  Delete "$INSTDIR\lib\ld.conf"
+  FileOpen $0 "$INSTDIR\lib\ld.conf" w
+  FileWrite $0 "$INSTDIR\lib$\n"
+  FileWrite $0 "$INSTDIR\lib\stublibs$\n"
   FileClose $0
 
   WriteRegExpandStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml" "UninstallString" "$INSTDIR\uninstall.exe"

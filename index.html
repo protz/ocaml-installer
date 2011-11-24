@@ -1,0 +1,190 @@
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title>Jonathan Protzenko's researcher-style personal homepage</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <!-- CSS concatenated and minified via ant build script-->
+  <link rel="stylesheet" href="css/style.css">
+  <link href='http://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <!-- end CSS-->
+
+  <script>
+    window.addEventListener("load", function () {
+      (function f (p) {
+        var div = document.getElementsByClassName("myEyesHurt")[0];
+        if (p)
+          div.setAttribute("class", "myEyesHurt s1");
+        else
+          div.setAttribute("class", "myEyesHurt");
+        setTimeout(function () f(!p), 200);
+      })(false);
+    }, false);
+  </script>
+  <script src="js/libs/modernizr-2.0.6.min.js"></script>
+</head>
+
+<body>
+
+  <div id="container">
+    <header>
+      <h1>OCaml on Windows</h1>
+    </header>
+    <div id="main" role="main">
+      <section>
+        <h2>Introduction</h2>
+        <p>
+          There are several ways to compile and distribute OCaml on Windows.
+          This page provides a very easy way to get up and running on Windows,
+          without the hassle of installing Cygwin or fighting to get OCaml to
+          compile. Once you're done with the setup below, you'll be able to open
+          an Emacs an run M-x run-caml. Read on for the details.
+        </p>
+        <div class="myEyesHurt">
+          <a href="http://yquem.inria.fr/~protzenk/caml-installer/">
+            Download
+          </a>
+        </div>
+        <h2>Changelog</h2>
+        <ul>
+          <li>20111020 Fixed a defect in the installer-generated ld.conf.
+          Symptoms: unable to compile against graphics.cma, unable to find
+          dllgraphics.dll.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Different levels of proficiency</h2>
+        <section>
+          <h3>Level 1</h3>
+          <p>
+            This is what you get by using this installer. Mostly, an Emacs + all
+            the settings taken care of so that you can start playing.
+            <ul>
+              <li><strong>A complete OCaml binary distribution</strong>, with
+              all tools, including the infamous OCamlWin.exe, OCamlBrowser,
+              OCamlBuild, OCamlDoc, etc.</li>
+              <li>The installer will take care of <strong>fetching the required
+              version of ActiveTcl</strong> for you, and launching its setup
+              if necessary.</li>
+              <li>The installer will offer you the option of <strong>setting up
+              an Emacs for you</strong>, including the caml-mode; it will also
+              associate ml and mli files with Emacs, so that you are ready to
+              hack.</li>
+              <li>The installer will add the right start menu entries, configure
+              the <tt>PATH</tt> variable, export the right environment
+              variables.
+              </li>
+              <li>The installer ships with flexlink for mingw.</li>
+            </ul>
+            However, there's a few things that the installer does not do:
+            <ul>
+              <li><strong>you won't be able to compile native programs</strong>:
+              ocamlopt is shipped, but you need to upgrade to level 2 for
+              ocamlopt to work (see below)</li>
+            </ul>
+          </p>
+        </section>
+        <section>
+          <h3>Level 2</h3>
+          <p>
+            If you are serious about OCaml and want to compile to native code
+            instead of bytecode, or get the benefits of a full Unix-like
+            environment, you still need to run the installer provided on this
+            page, but you will need to install <a
+            href="http://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/">MinGW/MSYS</a>
+            as well. Just grab the most recent version (.exe installer), and
+            make sure you check every checkbox during the setup (ok, you might
+            skip Fortran and Objective-C, but make sure you install MSYS and the
+            MinGW developer tools). This will install a full unix-like
+            environment with a toolchain, including <tt>as</tt> which is a
+            requirement for <tt>ocamlopt</tt> to work properly.
+          </p>
+          <p>
+            Once you've installed this environment, just open "MinGW Shell" in
+            the Start Menu, and you'll be prompted with
+            a bash shell. You just need one last step: edit your
+            <tt>.profile</tt> file (type
+            <tt>vim .profile</tt> at the prompt, or edit
+            <tt>c:\mingw\msys\1.0\&lt;yourname&gt;\.profile</tt> with your favorite
+            editor, and put the line below in it:
+            <pre>
+            export FLEXLINKFLAGS="-L/mingw/lib -L/mingw/lib/gcc/mingw32/N.N.N"
+            </pre>
+            where <tt>N.N.N</tt> is the version of gcc shipped with MinGW/MSYS
+            (try <tt>gcc -dumpversion</tt>). Close the terminal.
+          </p>
+          <p>
+            That's all! You can start writing makefiles and using ocamlopt all
+            over the place, everything should work fine.
+          </p>
+        </section>
+      </section>
+      <section>
+        <h2>Download</h2>
+        <p>
+          Just grab the .exe with the highest version number from <a
+            href="http://yquem.inria.fr/~protzenk/caml-installer/">here</a>. This installer has been tested on
+          Windows XP, Windows 7 and Windows 8. I have no idea if it works with
+          earlier versions of Windows.
+        </p>
+        <p>
+          The installer picture is from Flick © Neil and Kathy Carey. The
+          installer uses NSIS which a its own <a
+          href="http://http://nsis.sourceforge.net/License">license</a>. The
+          installer also uses NSISunz which was originally written by <a
+            href="http://www.saivert.com">Saivert</a>.
+        </p>
+      </section>
+      <section>
+        <h2>Bugs, patches</h2>
+        <p>
+          The project <a href="https://github.com/protz/ocaml-installer">lives on
+          GitHub</a>. Please file any bug in the "Issues" section there.
+        </p>
+        <p>
+          The README there should contain enough information to get you (roughly)
+          started if you want to repackage the installer yourself.
+        </p>
+      </section>
+    </div>
+    <footer>
+
+    </footer>
+  </div> <!--! end of #container -->
+
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+  <script>window.jQuery || document.write('<script src="js/libs/jquery-1.6.2.min.js"><\/script>')</script>
+
+
+  <!-- scripts concatenated and minified via ant build script-->
+  <script defer src="js/plugins.js"></script>
+  <script defer src="js/script.js"></script>
+  <!-- end scripts-->
+
+
+  <script> // Change UA-XXXXX-X to be your site's ID
+    window._gaq = [['_setAccount','UA-4807066-4'],['_trackPageview'],['_trackPageLoadTime']];
+    Modernizr.load({
+      load: ('https:' == location.protocol ? '//ssl' : '//www') + '.google-analytics.com/ga.js'
+    });
+  </script>
+
+
+  <!--[if lt IE 7 ]>
+    <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
+    <script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script>
+  <![endif]-->
+  
+</body>
+</html>

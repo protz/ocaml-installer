@@ -61,6 +61,14 @@
           Symptoms: unable to compile against graphics.cma, unable to find
           dllgraphics.dll.</li>
         </ul>
+        <h2>Current issues</h2>
+        <ul>
+          <li>gcc 4.6 doesn't understand the <tt>-mno-cygwin</tt> option
+          anymore; this breaks flexlink. Until the toolchain issues are resolved,
+          if you want native compilation, don't upgrade your mingw installation
+          and stick with gcc 4.5.
+          </li>
+        </ul>
       </section>
       <section>
         <h2>Different levels of proficiency</h2>

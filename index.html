@@ -63,10 +63,11 @@
         </ul>
         <h2>Current issues</h2>
         <ul>
-          <li>gcc 4.6 doesn't understand the <tt>-mno-cygwin</tt> option
-          anymore; this breaks flexlink. Until the toolchain issues are resolved,
-          if you want native compilation, don't upgrade your mingw installation
-          and stick with gcc 4.5.
+          <li>Please double-check which gcc is in your path using <tt>which
+            gcc</tt>. If the cygwin one is in the path, it will fail to link
+            programs properly, because flexlink calls gcc with the
+            <tt>-mno-cygwin</tt> option, and the compiler from cygwin doesn't
+            understand that option anymore.
           </li>
         </ul>
       </section>

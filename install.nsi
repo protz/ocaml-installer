@@ -31,15 +31,17 @@
 !define EMACS_VER "23.3"
 !define ROOT_DIR "c:\ocamlmgw" ; the directory where your binary dist of ocaml lives
 
+!define MULTIUSER_EXECUTIONLEVEL Highest
+
 !include "version.nsh"
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
 !include "EnvVarUpdate.nsh"
+!include "MultiUser.nsh"
 
 Name "OCaml"
-OutFile "ocaml-${MUI_VERSION}-mingw32.exe"
+OutFile "ocaml-${MUI_VERSION}-i686-mingw64.exe"
 InstallDir "$PROGRAMFILES32\${MUI_PRODUCT}"
-RequestExecutionLevel admin
 
 !define MUI_WELCOMEPAGE_TITLE "Welcome to the OCaml setup for windows."
 !define MUI_WELCOMEPAGE_TEXT "This wizard will install OCaml ${MUI_VERSION}, as well as required tools and libraries for it to work properly."
@@ -82,6 +84,8 @@ Var STARTMENUFOLDER
 
 Section "OCaml" SecOCaml
 
+  !insertmacro MULTIUSER_INIT
+
   ReadRegStr $1 SHCTX "SOFTWARE\OCaml" ""
   
   ${If} $1 != ""
@@ -104,10 +108,13 @@ Section "OCaml" SecOCaml
   File /r ${ROOT_DIR}\bin
   File /r ${ROOT_DIR}\lib
   File /r ${ROOT_DIR}\man
+
+  ; This is for the OCamlWin thing
+  WriteRegStr SHCTX "Software\Objective Caml" "InterpreterPath" "$INSTDIR\bin\ocaml.exe"
   
   WriteRegStr SHCTX "Software\OCaml" "" $INSTDIR
   ; We want to overwrite that one anyway for the new setup to work properly.
-  WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "OCAMLLIB" "$INSTDIR\lib"
+  WriteRegStr SHCTX "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "OCAMLLIB" "$INSTDIR\lib"
   ${EnvVarUpdate} $0 "PATH" "P" "HKLM" "$INSTDIR\bin"
 
   ; There's already a file like that in the original directory, so remove it,
@@ -216,6 +223,8 @@ LangString DESC_SecEmacs ${LANG_ENGLISH} "Emacs is a text editor with excellent 
 ; generate the uninstaller
 
 Section "Uninstall"
+
+  !insertmacro MULTIUSER_UNINIT
 
   ${If} ${FileExists} "$INSTDIR\emacs-${EMACS_VER}"
     MessageBox MB_YESNO "Also uninstall Emacs ${EMACS_VER}?" IDNO next

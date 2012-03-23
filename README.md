@@ -5,34 +5,34 @@ These are the source files if you want to rebuild the installer. If you just
 want to download the installer, see the "website" link near the top of the
 page.
 
+The installer now uses the "official" toolchain, namely Mingw64 living in a
+Cygwin environment.
+
 Requirements
 ------------
 
-* MinGW/MSYS (__not__ Cygwin)
-* FlexDLL
+* Cygwin with the mingw64 compiler suite, 32bit version (i686-w64-mingw32).
+* FlexDLL (at least 0.27)
 * NSIS
 * the NSISunz plugin for NSIS, that lives somewhere on the NSIS wiki
 
 Instructions
 ------------
 
-As of 2011-09-14, the OCaml sources require patching in order to build properly.
-This is mostly Makefile tweaking and should be integrated soon on trunk.
-
 The instructions above sometimes use the `c:\...`-style paths, sometimes the
 `/c/...`-style paths. This is significant, and you cannot blindly replace one
 for another.
 
 1. Install FlexDLL from Alain's website, and
-    * `export PATH=/path/to/flexdll:$PATH`
-    * `export FLEXLINKFLAGS="-L/mingw/lib -L/mingw/lib/gcc/mingw32/N.N.N"` where
-      `N.N.N` is the version of GCC that ships with your MinGW/MSYS setup.
+    * `export PATH=/cygdrive/c/path/to/flexdll:$PATH`
+    * `export FLEXLINKFLAGS="-Lc:/cygwin/usr/i686-w64-mingw32/sys-root/mingw/lib/
+      -Lc:/cygwin/lib/gcc/i686-w64-mingw32/N.N.N/"` where `N.N.N` is the version
+      of GCC that ships with your Cygwin setup.
 2. Grab a copy of ActiveTCL and install it, leave the default path (`c:\tcl`).
 2. Grab a copy of the OCaml sources, and keep the default install path
    (`c:\ocamlmgw`), this will make your life easier.
-3. Follow the instructions in `README.Win32`, section "MinGW/Cygwin" (but of
-   course you're not using Cygwin, nevermind). Try to compile OCaml. Swear. Try
-   again. Grab a tea. Succeed. Be happy.
+3. Follow the instructions in `README.Win32`, section "MinGW/Cygwin". Try to
+   compile OCaml. Swear. Try again. Grab a tea. Succeed. Be happy.
 3. Go into the `emacs/` directory.
     * Make sure there's an `emacs.exe` in your path (install Emacs if you have to).
     * Configure the Makefile so that the output directory is

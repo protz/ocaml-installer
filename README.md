@@ -6,7 +6,9 @@ want to download the installer, see the "website" link near the top of the
 page.
 
 The installer now uses the "official" toolchain, namely Mingw64 living in a
-Cygwin environment.
+Cygwin environment. The current version of this installer works with OCaml 4.0;
+if you want to compile an older version of OCaml, you need to switch to and older
+revision.
 
 Requirements
 ------------
@@ -28,6 +30,8 @@ for another.
     * `export FLEXLINKFLAGS="-Lc:/cygwin/usr/i686-w64-mingw32/sys-root/mingw/lib/
       -Lc:/cygwin/lib/gcc/i686-w64-mingw32/N.N.N/"` where `N.N.N` is the version
       of GCC that ships with your Cygwin setup.
+2. Refresh the files in the `flexdll/` directory of the installer, so that the
+   resulting installer ships the right version of flexdll.
 2. Grab a copy of ActiveTCL and install it, leave the default path (`c:\tcl`).
 2. Grab a copy of the OCaml sources, and keep the default install path
    (`c:\ocamlmgw`), this will make your life easier.

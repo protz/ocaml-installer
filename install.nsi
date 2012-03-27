@@ -115,15 +115,39 @@ Section "OCaml" SecOCaml
   WriteRegStr SHCTX "Software\OCaml" "" $INSTDIR
   ; We want to overwrite that one anyway for the new setup to work properly.
   WriteRegStr SHCTX "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "OCAMLLIB" "$INSTDIR\lib"
+  WriteRegStr SHCTX "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "OCAMLFIND_CONF" "$INSTDIR\etc\findlib.conf"
   ${EnvVarUpdate} $0 "PATH" "P" "HKLM" "$INSTDIR\bin"
 
   ; There's already a file like that in the original directory, so remove it,
   ; and write the correct values
   Delete "$INSTDIR\lib\ld.conf"
-  FileOpen $0 "$INSTDIR\lib\ld.conf" w
-  FileWrite $0 "$INSTDIR\lib$\n"
-  FileWrite $0 "$INSTDIR\lib\stublibs$\n"
-  FileClose $0
+  FileOpen  $1 "$INSTDIR\lib\ld.conf" w
+  FileWrite $1 "$INSTDIR\lib$\n"
+  FileWrite $1 "$INSTDIR\lib\stublibs$\n"
+  FileClose $1
+
+  ; Escape the install directory with the OCaml syntax (fingers crossed)
+  ${StrRep} $0 "$INSTDIR" "\" "\\"
+  ${StrRep} $0 $0 " " "\ "
+
+  Delete "$INSTDIR\lib\topfind"
+  FileOpen  $1 "$INSTDIR\topfind" w
+  FileWrite $1 "#load $\"$0\\lib\\site-lib\\findlib\\findlib.cma$\";;$\n"
+  FileWrite $1 "#load $\"$0\\lib\\site-lib\\findlib\\findlib_top.cma$\";;$\n"
+  FileWrite $1 "#directory $\"$0\\lib\\site-lib\\findlib$\";;$\n"
+  FileWrite $1 "Topfind.add_predicates [ $\"byte$\"; $\"toploop$\" ];$\n"
+  FileWrite $1 "Topfind.don't_load [ $\"findlib$\" ];$\n"
+  FileWrite $1 "Topfind.announce();;$\n"
+  FileClose $1
+
+  Delete "$INSTDIR\etc\findlib.conf"
+  FileOpen  $1 "$INSTDIR\etc\findlib.conf" w
+  FileWrite $1 "destdir=$\"$0\\lib\\site-lib$\"$\n"
+  FileWrite $1 "path=$\"$0\\lib\\site-lib$\"$\n"
+  FileWrite $1 "ocamlc=$\"ocamlc.opt$\"$\n"
+  FileWrite $1 "ocamlopt=$\"ocamlopt.opt$\"$\n"
+  FileWrite $1 "ocamldep=$\"ocamldep.opt$\"$\n"
+  FileClose $1
 
   WriteRegExpandStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml" "UninstallString" "$INSTDIR\uninstall.exe"
   WriteRegExpandStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml" "InstallLocation" "$INSTDIR"

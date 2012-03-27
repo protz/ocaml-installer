@@ -42,6 +42,7 @@ for another.
     * Run `make` in that directory.
 3. Checkout a copy of OCamlWin from the OCaml forge, edit Makefile.local and
    `make && make install`.
+3. Add `c:\ocamlmgw\bin` to your path, `configure` and `make` findlib.
 4. Install NSIS, grab `nsisunz.dll` somewhere on the interwebs and put it NSIS's
    `Plugins` directory.
 5. Make sure `/cygdrive/c/ocamlmgw/bin` is in your path.

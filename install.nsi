@@ -63,6 +63,9 @@ Var STARTMENUFOLDER
 !define SHCNE_ASSOCCHANGED 0x8000000
 !define SHCNF_IDLIST 0
 
+!define env_all     '"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"'
+!define env_current '"Environment"'
+
 ; -------------
 ; Generate zillions of pages to look professional
 
@@ -81,13 +84,14 @@ Var STARTMENUFOLDER
 
 ; -------------
 ; Main entry point
+Function .onInit
+  !insertmacro MULTIUSER_INIT
+FunctionEnd
 
 Section "OCaml" SecOCaml
 
-  !insertmacro MULTIUSER_INIT
-
   ReadRegStr $1 SHCTX "SOFTWARE\OCaml" ""
-  
+
   ${If} $1 != ""
     MessageBox MB_YESNO "There seems to be a previous version of OCaml installed. It is strongly recommended you uninstall it before proceeding. Proceed anyway?" IDNO end
   ${EndIf}
@@ -106,17 +110,33 @@ Section "OCaml" SecOCaml
   File ${ROOT_DIR}\License.txt
   File ${ROOT_DIR}\OCamlWin.exe
   File /r ${ROOT_DIR}\bin
+  File /r ${ROOT_DIR}\etc
   File /r ${ROOT_DIR}\lib
   File /r ${ROOT_DIR}\man
 
-  ; This is for the OCamlWin thing
-  WriteRegStr SHCTX "Software\Objective Caml" "InterpreterPath" "$INSTDIR\bin\ocaml.exe"
-  
-  WriteRegStr SHCTX "Software\OCaml" "" $INSTDIR
-  ; We want to overwrite that one anyway for the new setup to work properly.
-  WriteRegStr SHCTX "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "OCAMLLIB" "$INSTDIR\lib"
-  WriteRegStr SHCTX "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "OCAMLFIND_CONF" "$INSTDIR\etc\findlib.conf"
-  ${EnvVarUpdate} $0 "PATH" "P" "HKLM" "$INSTDIR\bin"
+  ${If} $MultiUser.InstallMode == "AllUsers"
+    ; This is for the OCamlWin thing
+    WriteRegStr HKLM "Software\Objective Caml" "InterpreterPath" "$INSTDIR\bin\ocaml.exe"
+
+    WriteRegStr HKLM "Software\OCaml" "" $INSTDIR
+    ; We want to overwrite that one anyway for the new setup to work properly.
+    WriteRegStr HKLM ${env_all} "OCAMLLIB" "$INSTDIR\lib"
+    WriteRegStr HKLM ${env_all} "OCAMLFIND_CONF" "$INSTDIR\etc\findlib.conf"
+    ${EnvVarUpdate} $0 "PATH" "P" "HKLM" "$INSTDIR\bin"
+  ${ElseIf} $MultiUser.InstallMode == "CurrentUser"
+     ; This is for the OCamlWin thing
+    WriteRegStr HKCU "Software\Objective Caml" "InterpreterPath" "$INSTDIR\bin\ocaml.exe"
+
+    WriteRegStr HKCU "Software\OCaml" "" $INSTDIR
+    ; We want to overwrite that one anyway for the new setup to work properly.
+    WriteRegStr HKCU ${env_current} "OCAMLLIB" "$INSTDIR\lib"
+    WriteRegStr HKCU ${env_current} "OCAMLFIND_CONF" "$INSTDIR\etc\findlib.conf"
+    ${EnvVarUpdate} $0 "PATH" "P" "HKCU" "$INSTDIR\bin"
+  ${Else}
+    SetErrors
+    DetailPrint "Error: $MultiUser.InstallMode unexpected value"
+  ${EndIf}
+
 
   ; There's already a file like that in the original directory, so remove it,
   ; and write the correct values
@@ -131,7 +151,7 @@ Section "OCaml" SecOCaml
   ${StrRep} $0 $0 " " "\ "
 
   Delete "$INSTDIR\lib\topfind"
-  FileOpen  $1 "$INSTDIR\topfind" w
+  FileOpen  $1 "$INSTDIR\lib\topfind" w
   FileWrite $1 "#load $\"$0\\lib\\site-lib\\findlib\\findlib.cma$\";;$\n"
   FileWrite $1 "#load $\"$0\\lib\\site-lib\\findlib\\findlib_top.cma$\";;$\n"
   FileWrite $1 "#directory $\"$0\\lib\\site-lib\\findlib$\";;$\n"
@@ -159,6 +179,7 @@ Section "OCaml" SecOCaml
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     CreateDirectory "$SMPROGRAMS\$STARTMENUFOLDER"
     CreateShortCut "$SMPROGRAMS\$STARTMENUFOLDER\OCamlWin.lnk" "$INSTDIR\OCamlWin.exe"
+    CreateShortCut "$SMPROGRAMS\$STARTMENUFOLDER\Uninstall.lnk" "$INSTDIR\uninstall.exe"
     CreateShortCut "$SMPROGRAMS\$STARTMENUFOLDER\OCamlBrowser.lnk" "$INSTDIR\bin\ocamlbrowser.exe"
     CreateShortCut "$SMPROGRAMS\$STARTMENUFOLDER\Online Documentation.lnk" "$INSTDIR\onlinedoc.url"
   !insertmacro MUI_STARTMENU_WRITE_END
@@ -172,15 +193,21 @@ SectionEnd
 Section "ActiveTcl ${ACTIVETCL_VERSION}" SecActiveTcl
 
   ReadRegStr $1 HKLM "SOFTWARE\ActiveState\ActiveTcl" "CurrentVersion"
-  
+
   ${If} $1 == ${ACTIVETCL_VERSION}
     MessageBox MB_YESNO "You already seem to have ActiveTcl ${ACTIVETCL_VERSION} installed. Download and install ActiveTcl anyway?" IDNO end
   ${EndIf}
-  
 
   NSISdl::download ${ACTIVETCL_URL} "$TEMP\activetcl.exe"
+
+  Pop $R0
+  StrCmp $R0 "success" +3
+    MessageBox MB_OK "Couldn't download the ActiveTCL installer: $R0"
+    SetErrors
+    DetailPrint "Please download the ActiveTCL installer from activestate.com. Just grab the latest free, 32-bit installer."
+
   ExecWait "$TEMP\activetcl.exe"
-  
+
   end:
 
 SectionEnd
@@ -208,7 +235,15 @@ Section "Emacs ${EMACS_VER}" SecEmacs
 
   ; register file types, add emacs bin directory to the path
 
-  ${EnvVarUpdate} $0 "PATH" "P" "HKLM" "$INSTDIR\emacs-${EMACS_VER}\bin"
+  ${If} $MultiUser.InstallMode == "AllUsers"
+    ${EnvVarUpdate} $0 "PATH" "P" "HKLM" "$INSTDIR\emacs-${EMACS_VER}\bin"
+  ${ElseIf} $MultiUser.InstallMode == "CurrentUser"
+    ${EnvVarUpdate} $0 "PATH" "P" "HKCU" "$INSTDIR\emacs-${EMACS_VER}\bin"
+  ${Else}
+    SetErrors
+    DetailPrint "Error: $MultiUser.InstallMode unexpected value"
+  ${EndIf}
+
 
   WriteRegStr HKCR ".mli" "" "OCaml.mli"
   WriteRegStr HKCR "OCaml.mli" "" "OCaml Interface File"
@@ -246,14 +281,24 @@ LangString DESC_SecEmacs ${LANG_ENGLISH} "Emacs is a text editor with excellent 
 ; The semantics are: if the section is named "Uninstall", then this is used to
 ; generate the uninstaller
 
-Section "Uninstall"
-
+Function un.onInit
   !insertmacro MULTIUSER_UNINIT
+FunctionEnd
+
+Section "Uninstall"
 
   ${If} ${FileExists} "$INSTDIR\emacs-${EMACS_VER}"
     MessageBox MB_YESNO "Also uninstall Emacs ${EMACS_VER}?" IDNO next
 
-    ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\emacs-${EMACS_VER}\bin"
+    ${If} $MultiUser.InstallMode == "AllUsers"
+      ${un.EnvVarUpdate} $0 "PATH" "R" HKLM "$INSTDIR\emacs-${EMACS_VER}\bin"
+    ${ElseIf} $MultiUser.InstallMode == "CurrentUser"
+      ${un.EnvVarUpdate} $0 "PATH" "R" HKCU "$INSTDIR\emacs-${EMACS_VER}\bin"
+    ${Else}
+      SetErrors
+      DetailPrint "Error: $MultiUser.InstallMode unexpected value"
+    ${EndIf}
+
     RMDir /r "$INSTDIR\emacs-${EMACS_VER}"
 
     ReadRegStr $R0 HKCR ".mli" ""
@@ -272,11 +317,12 @@ Section "Uninstall"
 
   next:
 
-  ; The rationale is that idiots^W users might install this in their Program
-  ; Files directory, so we can't blindy remove the INSTDIR...
+  ; The rationale is that users might install this in their Program Files
+  ; directory, so we can't blindy remove the INSTDIR...
   Delete "$INSTDIR\bin\flexlink.exe"
   Delete "$INSTDIR\bin\flexdll_initer_mingw.o"
   Delete "$INSTDIR\bin\flexdll_mingw.o"
+  ; Will remove only if the directory is empty
   RMDir "$INSTDIR\bin"
 
   Delete "$INSTDIR\ocaml-icon.ico"
@@ -296,15 +342,52 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\$STARTMENUFOLDER\Online Documentation.lnk"
   RMDir "$SMPROGRAMS\$STARTMENUFOLDER"
 
-  ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\bin"
-  ; Using EnvVarUpdate makes sure we do *not* alter OCAMLLIB in case it has
-  ; changed in the meanwhile.
-  ${un.EnvVarUpdate} $0 "OCAMLLIB" "R" "HKLM" "$INSTDIR\lib"
-  ReadRegStr $1 SHCTX "SOFTWARE\OCaml" ""
-  ${Unless} $1 != $INSTDIR
-    DeleteRegKey /ifempty SHCTX "SOFTWARE\OCaml"
-  ${EndUnless}
 
-  DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml"
+  ${If} $MultiUser.InstallMode == "AllUsers"
+    ${un.EnvVarUpdate} $0 "PATH" "R" HKLM "$INSTDIR\bin"
+
+    ; OCAMLLIB
+    ReadRegStr $R1 HKLM ${env_all} "OCAMLLIB"
+    ${Unless} $R1 != "$INSTDIR\lib"
+      DeleteRegValue HKLM ${env_all} "OCAMLLIB"
+    ${EndUnless}
+
+    ; OCAMLFIND_CONF
+    ReadRegStr $R1 HKLM ${env_all} "OCAMLFIND_CONF"
+    ${Unless} $R1 != "$INSTDIR\etc\findlib.conf"
+      DeleteRegValue HKLM ${env_all} "OCAMLFIND_CONF"
+    ${EndUnless}
+
+    ReadRegStr $R1 HKLM "SOFTWARE\OCaml" ""
+    ${Unless} $R1 != $INSTDIR
+      DeleteRegKey /ifempty HKLM "SOFTWARE\OCaml"
+    ${EndUnless}
+
+    DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml"
+  ${ElseIf} $MultiUser.InstallMode == "CurrentUser"
+    ${un.EnvVarUpdate} $0 "PATH" "R" HKCU "$INSTDIR\bin"
+
+    ; OCAMLLIB
+    ReadRegStr $R1 HKCU ${env_current} "OCAMLLIB"
+    ${Unless} $R1 != "$INSTDIR\lib"
+      DeleteRegValue HKCU ${env_current} "OCAMLLIB"
+    ${EndUnless}
+
+    ; OCAMLFIND_CONF
+    ReadRegStr $R1 HKCU ${env_current} "OCAMLFIND_CONF"
+    ${Unless} $R1 != "$INSTDIR\etc\findlib.conf"
+      DeleteRegValue HKCU ${env_current} "OCAMLFIND_CONF"
+    ${EndUnless}
+
+    ReadRegStr $R1 HKCU "SOFTWARE\OCaml" ""
+    ${Unless} $R1 != $INSTDIR
+      DeleteRegKey /ifempty HKCU "SOFTWARE\OCaml"
+    ${EndUnless}
+
+    DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml"
+  ${Else}
+    SetErrors
+    DetailPrint "Error: $MultiUser.InstallMode unexpected value"
+  ${EndIf}
 
 SectionEnd

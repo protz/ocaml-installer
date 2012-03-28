@@ -25,7 +25,7 @@
 !define MUI_ICON "ocaml-icon.ico"
 ; this must match the activetcl version ocaml was compiled against
 !define ACTIVETCL_VERSION "8.5.10.1"
-!define ACTIVETCL_URL "http://downloads.activestate.com/ActiveTcl/releases/8.5.10.1/ActiveTcl8.5.10.1.295062-win32-ix86-threaded.exe"
+!define ACTIVETCL_URL "http://downloads.activestate.com/ActiveTcl/releases/8.5.11.1/ActiveTcl8.5.11.1.295590-win32-ix86-threaded.exe"
 !define EMACS_URL "http://ftp.gnu.org/gnu/emacs/windows/emacs-23.3-bin-i386.zip"
 ;!define EMACS_URL "http://yquem/~protzenk/emacs-23.3-bin-i386.zip"
 !define EMACS_VER "23.3"
@@ -54,6 +54,7 @@ InstallDir "$PROGRAMFILES32\${MUI_PRODUCT}"
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "SHCTX"
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\OCaml"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
+!define MUI_DIRECTORYPAGE_TEXT_TOP "Important: if you're not an administrator for this machine, now is the right time to pick another location (e.g. My Documents)."
 
 Var STARTMENUFOLDER
 
@@ -346,6 +347,7 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\$STARTMENUFOLDER\OCamlBrowser.lnk"
   Delete "$SMPROGRAMS\$STARTMENUFOLDER\Emacs.lnk"
   Delete "$SMPROGRAMS\$STARTMENUFOLDER\Online Documentation.lnk"
+  Delete "$SMPROGRAMS\$STARTMENUFOLDER\Uninstall.lnk"
   RMDir "$SMPROGRAMS\$STARTMENUFOLDER"
 
 

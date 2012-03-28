@@ -55,7 +55,6 @@ InstallDir "$PROGRAMFILES32\${MUI_PRODUCT}"
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "SHCTX"
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\OCaml"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
-!define MUI_DIRECTORYPAGE_TEXT_TOP "Important: if you're not an administrator for this machine, now is the right time to pick another location (e.g. My Documents)."
 
 Var STARTMENUFOLDER
 
@@ -88,6 +87,11 @@ Var STARTMENUFOLDER
 ; Main entry point
 Function .onInit
   !insertmacro MULTIUSER_INIT
+
+  ${If} $MultiUser.InstallMode == "CurrentUser"
+    StrCpy $INSTDIR "$APPDATA\${MUI_PRODUCT}"
+  ${EndIf}
+
 FunctionEnd
 
 Section "OCaml" SecOCaml
@@ -146,6 +150,8 @@ Section "OCaml" SecOCaml
     SetErrors
     DetailPrint "Error: $MultiUser.InstallMode unexpected value"
   ${EndIf}
+
+  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
 
   ; There's already a file like that in the original directory, so remove it,
@@ -426,5 +432,7 @@ Section "Uninstall"
     SetErrors
     DetailPrint "Error: $MultiUser.InstallMode unexpected value"
   ${EndIf}
+
+  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
 SectionEnd

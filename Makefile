@@ -1,4 +1,4 @@
-NSIS=/cygdrive/c/Program\ Files\ \(x86\)/NSIS/makensisw.exe
+NSIS=/cygdrive/c/Program\ Files\ \(x86\)/NSIS/makensis.exe
 SCRIPT=install.nsi
 OCAMLROOT=/cygdrive/c/ocamlmgw/
 OCAMLROOTW=c:/ocamlmgw/

@@ -148,7 +148,6 @@ Section "OCaml" SecOCaml
 
   ; Escape the install directory with the OCaml syntax (fingers crossed)
   ${StrRep} $0 "$INSTDIR" "\" "\\"
-  ${StrRep} $0 $0 " " "\ "
 
   Delete "$INSTDIR\lib\topfind"
   FileOpen  $1 "$INSTDIR\lib\topfind" w
@@ -164,6 +163,8 @@ Section "OCaml" SecOCaml
   FileOpen  $1 "$INSTDIR\etc\findlib.conf" w
   FileWrite $1 "destdir=$\"$0\\lib\\site-lib$\"$\n"
   FileWrite $1 "path=$\"$0\\lib\\site-lib$\"$\n"
+  FileWrite $1 "stdlib=$\"$0\\lib$\"$\n"
+  FileWrite $1 "ldconf=$\"$0\\lib\\ld.conf$\"$\n"
   FileWrite $1 "ocamlc=$\"ocamlc.opt$\"$\n"
   FileWrite $1 "ocamlopt=$\"ocamlopt.opt$\"$\n"
   FileWrite $1 "ocamldep=$\"ocamldep.opt$\"$\n"
@@ -201,10 +202,12 @@ Section "ActiveTcl ${ACTIVETCL_VERSION}" SecActiveTcl
   NSISdl::download ${ACTIVETCL_URL} "$TEMP\activetcl.exe"
 
   Pop $R0
-  StrCmp $R0 "success" +3
+  StrCmp $R0 "success" ok
     MessageBox MB_OK "Couldn't download the ActiveTCL installer: $R0"
     SetErrors
+    DetailPrint $R0
     DetailPrint "Please download the ActiveTCL installer from activestate.com. Just grab the latest free, 32-bit installer."
+  ok:
 
   ExecWait "$TEMP\activetcl.exe"
 
@@ -219,12 +222,15 @@ Section "Emacs ${EMACS_VER}" SecEmacs
   ${EndIf}
 
   NSISdl::download ${EMACS_URL} "$TEMP\emacs.zip"
-  nsisunz::UnzipToLog "$TEMP\emacs.zip" "$INSTDIR"
 
   Pop $0
   StrCmp $0 "success" ok
+    MessageBox MB_OK "Couldn't download the Emacs zip: $0"
+    SetErrors
     DetailPrint "$0"
   ok:
+
+  nsisunz::UnzipToLog "$TEMP\emacs.zip" "$INSTDIR"
 
   ; add the caml-mode in the emacs distribution
 

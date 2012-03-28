@@ -37,6 +37,7 @@
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
 !include "EnvVarUpdate.nsh"
+!include "IfKeyExists.nsh"
 !include "MultiUser.nsh"
 
 Name "OCaml"
@@ -132,7 +133,15 @@ Section "OCaml" SecOCaml
     ; We want to overwrite that one anyway for the new setup to work properly.
     WriteRegStr HKCU ${env_current} "OCAMLLIB" "$INSTDIR\lib"
     WriteRegStr HKCU ${env_current} "OCAMLFIND_CONF" "$INSTDIR\etc\findlib.conf"
-    ${EnvVarUpdate} $0 "PATH" "P" "HKCU" "$INSTDIR\bin"
+
+    ; EnvVarUpdate won't work if PATH doesn't exist or is empty...
+    !insertmacro IfKeyExists "HKLM" ${env_current} "PATH"
+    Pop $R0
+    ${If} $R0 == 1 ; PATH exists, update it (and hope it's not empty)
+      ${EnvVarUpdate} $0 "PATH" "P" "HKCU" "$INSTDIR\bin"
+    ${Else}
+      WriteRegStr HKCU ${env_current} "PATH" "$INSTDIR\bin"
+    ${EndIf}
   ${Else}
     SetErrors
     DetailPrint "Error: $MultiUser.InstallMode unexpected value"
@@ -208,6 +217,7 @@ Section "ActiveTcl ${ACTIVETCL_VERSION}" SecActiveTcl
     SetErrors
     DetailPrint $R0
     DetailPrint "Please download the ActiveTCL installer from activestate.com. Just grab the latest free, 32-bit installer."
+    goto end
   ok:
 
   ExecWait "$TEMP\activetcl.exe"
@@ -298,9 +308,9 @@ Section "Uninstall"
     MessageBox MB_YESNO "Also uninstall Emacs ${EMACS_VER}?" IDNO next
 
     ${If} $MultiUser.InstallMode == "AllUsers"
-      ${un.EnvVarUpdate} $0 "PATH" "R" HKLM "$INSTDIR\emacs-${EMACS_VER}\bin"
+      ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\emacs-${EMACS_VER}\bin"
     ${ElseIf} $MultiUser.InstallMode == "CurrentUser"
-      ${un.EnvVarUpdate} $0 "PATH" "R" HKCU "$INSTDIR\emacs-${EMACS_VER}\bin"
+      ${un.EnvVarUpdate} $0 "PATH" "R" "HKCU" "$INSTDIR\emacs-${EMACS_VER}\bin"
     ${Else}
       SetErrors
       DetailPrint "Error: $MultiUser.InstallMode unexpected value"
@@ -352,7 +362,13 @@ Section "Uninstall"
 
 
   ${If} $MultiUser.InstallMode == "AllUsers"
-    ${un.EnvVarUpdate} $0 "PATH" "R" HKLM "$INSTDIR\bin"
+    ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\bin"
+
+    ; This is for the OCamlWin thing
+    ReadRegStr $R1 HKLM "Software\Objective Caml" "InterpreterPath"
+    ${Unless} $R1 != "$INSTDIR\bin\ocaml.exe"
+      DeleteRegValue HKLM "Software\Objective Caml" "InterpreterPath"
+    ${EndUnless}
 
     ; OCAMLLIB
     ReadRegStr $R1 HKLM ${env_all} "OCAMLLIB"
@@ -373,7 +389,20 @@ Section "Uninstall"
 
     DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml"
   ${ElseIf} $MultiUser.InstallMode == "CurrentUser"
-    ${un.EnvVarUpdate} $0 "PATH" "R" HKCU "$INSTDIR\bin"
+    ; Completely blast the user-local PATH variable if we're the only ones to
+    ; use it. That way, the installer has a chance to work properly next time...
+    ReadRegStr $R1 HKCU ${env_current} "PATH"
+    ${If} $R1 == "$INSTDIR\bin"
+      DeleteRegValue HKCU ${env_current} "PATH"
+    ${Else}
+      ${un.EnvVarUpdate} $0 "PATH" "R" "HKCU" "$INSTDIR\bin"
+    ${EndIf}
+
+    ; This is for the OCamlWin thing
+    ReadRegStr $R1 HKCU "Software\Objective Caml" "InterpreterPath"
+    ${Unless} $R1 != "$INSTDIR\bin\ocaml.exe"
+      DeleteRegValue HKCU "Software\Objective Caml" "InterpreterPath"
+    ${EndUnless}
 
     ; OCAMLLIB
     ReadRegStr $R1 HKCU ${env_current} "OCAMLLIB"

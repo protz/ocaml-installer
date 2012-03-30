@@ -29,6 +29,7 @@
 !define EMACS_URL "http://ftp.gnu.org/gnu/emacs/windows/emacs-23.3-bin-i386.zip"
 ;!define EMACS_URL "http://yquem/~protzenk/emacs-23.3-bin-i386.zip"
 !define EMACS_VER "23.3"
+!define CYGWIN_URL "http://cygwin.com/setup.exe"
 !define ROOT_DIR "c:\ocamlmgw" ; the directory where your binary dist of ocaml lives
 
 !define MULTIUSER_EXECUTIONLEVEL Highest
@@ -45,12 +46,31 @@ OutFile "ocaml-${MUI_VERSION}-i686-mingw64.exe"
 InstallDir "$PROGRAMFILES32\${MUI_PRODUCT}"
 
 !define MUI_WELCOMEPAGE_TITLE "Welcome to the OCaml setup for windows."
-!define MUI_WELCOMEPAGE_TEXT "This wizard will install OCaml ${MUI_VERSION}, as well as required tools and libraries for it to work properly."
+!define MUI_WELCOMEPAGE_TEXT "This wizard will install OCaml ${MUI_VERSION}, \
+as well as findlib (package management tool) and flexdll (prerequisite for \
+compiling native code).$\n$\n\
+The installer can install the following extra components for you:$\n\
+- Emacs, a text editor, with support for OCaml. This will also create the right \
+associations in Window's file explorer.$\n\
+- ActiveTCL, a GUI library that is required if you want to use OCamlBrowser, or \
+create graphical user interfaces using the Tcl/Tk bindings (labltk).$\n\
+- Cygwin, a Unix layer on top of windows. This is required if you want to \
+perform native compilation. This wizard will launch Cygwin's setup.exe with the \
+right packages pre-checked, so that all you have to do is click through the wizard."
 !define MUI_LICENSEPAGE_TEXT_TOP "OCaml is distributed under a modified QPL license."
 !define MUI_LICENSEPAGE_TEXT_BOTTOM "You must agree with the terms of the license below before installing OCaml."
-!define MUI_COMPONENTSPAGE_TEXT_COMPLIST "Tcl/Tk is a requirement, and Emacs is recommended to have a nice toplevel. This installer can download and install both."
+!define MUI_COMPONENTSPAGE_TEXT_COMPLIST "All the components below will be downloaded off the internet, and their own installers will be launched."
 !define MUI_FINISHPAGE_TITLE "Congratulations! You have installed OCaml"
-!define MUI_FINISHPAGE_TEXT "You can now play with OCaml. Start menu entries and desktop shortcuts have been created. You can either run OCamlWin, which is old and clunky, or run Emacs, if you chose to install it. Once in Emacs, just hit Alt-X, type run-caml, hit enter, and start playing with the toplevel. Enjoy!"
+!define MUI_FINISHPAGE_TEXT "You can now play with OCaml. Start menu entries and \
+  desktop shortcuts have been created. $\n$\n\
+  - You can run OCamlWin, which is old \
+    and clunky.$\n\
+  - You can also run Emacs, if you chose to install it. Once in Emacs, just hit \
+    Alt-X, type run-caml, hit enter, and start playing with the toplevel.$\n\
+  - If you installed Cygwin, there should be a $\"Cygwin Shell$\" shortcut on your \
+    desktop. You can open up a shell, and use ocamlfind, or ocamlopt from the \
+    command line.$\n$\n\
+  Enjoy!"
 !define MUI_WELCOMEFINISHPAGE_BITMAP "side.bmp"
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "SHCTX"
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\OCaml"
@@ -290,14 +310,49 @@ Section "Emacs ${EMACS_VER}" SecEmacs
 
 SectionEnd
 
-LangString DESC_SecOCaml ${LANG_ENGLISH} "This contains the main OCaml distribution, including all OCaml compilers, ocamlbuild, ocamldoc, ocamlbrowser, labltk, and flexlink for the mingw toolchain."
-LangString DESC_SecActiveTcl ${LANG_ENGLISH} "ActiveTcl is distributed by ActiveState and provides the graphic libraries to run ocamlbrowser, as well as your own graphical programs if you choose so."
-LangString DESC_SecEmacs ${LANG_ENGLISH} "Emacs is a text editor with excellent OCaml support. This will download Emacs from the internet, and make sure the OCaml specific scripts are properly installed."
+Section "Cygwin" SecCygwin
+  ${If} ${FileExists} "$DESKTOP\cygwin-setup.exe"
+    MessageBox MB_YESNO "There already is a file called cygwin-setup.exe on your desktop. Overwrite?" IDNO end
+  ${EndIf}
+
+  NSISdl::download ${CYGWIN_URL} "$DESKTOP\cygwin-setup.exe"
+
+  Pop $0
+  StrCmp $0 "success" ok
+    MessageBox MB_OK "Couldn't download cygwin's setup.exe: $0"
+    SetErrors
+    DetailPrint "$0"
+  ok:
+
+  ExecWait "$DESKTOP\cygwin-setup.exe --quiet-mode \
+    --local-package-dir=c:\cygtmp\ \
+    --site=http://cygwin.cict.fr \
+    --packages=make,mingw64-i686-gcc-g++,mingw64-i686-gcc,patch,rlwrap,libreadline6,diffutils,wget,vim \
+    >NUL 2>&1"
+
+  end:
+
+SectionEnd
+
+LangString DESC_SecOCaml ${LANG_ENGLISH} "This contains the main OCaml \
+  distribution, including all OCaml compilers, ocamlbuild, ocamldoc, ocamlbrowser, \
+  labltk, ocamlfind, and flexlink for the mingw toolchain."
+LangString DESC_SecActiveTcl ${LANG_ENGLISH} "ActiveTcl is distributed by \
+  ActiveState and provides the graphical required libraries to run ocamlbrowser, \
+  as well as your own graphical programs if you choose so."
+LangString DESC_SecEmacs ${LANG_ENGLISH} "Emacs is a text editor with excellent \
+  OCaml support. This will download Emacs from the internet, and make sure the \
+  OCaml specific scripts are properly installed."
+LangString DESC_SecCygwin ${LANG_ENGLISH} "Cygwin provides a Unix-like layer on \
+  top of the Windows API. This is required if you want to run scripts such as odb, \
+  or perform native-code compilation. This will download Cygwin's setup.exe to \
+  your desktop as cygwin-setup.exe"
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecOCaml} $(DESC_SecOCaml)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecActiveTcl} $(DESC_SecActiveTcl)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecEmacs} $(DESC_SecEmacs)
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecCygwin} $(DESC_SecCygwin)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ; -------------

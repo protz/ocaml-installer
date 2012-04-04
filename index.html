@@ -69,6 +69,21 @@
             <tt>-mno-cygwin</tt> option, and the compiler from cygwin doesn't
             understand that option anymore.
           </li>
+          <li>
+          A user suggests the following solution to the above problem:
+          <pre>
+GCC shipped with (current) MingW no longer recognizes -mno-cygwin
+argument, my online searches for a workaround were fruitless, but
+turns out there is one, one can create a self specs file and
+make gcc (the driver) strip -mno-cygwin from cc1 invokation. This
+can be done by putting a file named "specs" into a directory listed
+under "install:" in the output of `gcc -print-search-dirs' containing
+following line:
+*cc1: %&lt;mno-cygwin
+
+Hope that would save someone the trouble of making things run.
+</pre>
+          </li>
         </ul>
       </section>
       <section>

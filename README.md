@@ -43,6 +43,8 @@ for another.
 3. Checkout a copy of OCamlWin from the OCaml forge, edit Makefile.local and
    `make && make install`.
 3. Add `c:\ocamlmgw\bin` to your path, `configure` and `make` findlib.
+3. Copy findlib's `src/findlib/topfind.p` to `topfind` in the OCaml Installer
+   directory.
 4. Install NSIS, grab `nsisunz.dll` somewhere on the interwebs and put it NSIS's
    `Plugins` directory.
 5. Make sure `/cygdrive/c/ocamlmgw/bin` is in your path.
@@ -55,6 +57,14 @@ for another.
 6. Make should also launch NSIS with the main script file, and hopefully it
    should all generate an installer. The installer is quite big (thank you
    camlp4).
+
+Things to test for
+------------------
+
+1. `rlwrap ocaml`, then `#use "topfind";;`
+2. `ocamlfind ocamlc -package unix -linkpkg test.ml` where `test.ml` uses the
+   `Unix` module, of course.
+3. `odb` on a sample package (e.g. `lwt`)
 
 Bugs, issues
 ------------

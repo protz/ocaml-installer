@@ -5,7 +5,7 @@ OCAMLROOTW=c:/ocamlmgw/
 
 .PHONY: version
 
-all: util version
+all: util version topfind
 	$(NSIS) $(SCRIPT)
 
 # Regenerate if gen_files.ml changed or there's a new ocaml version (and

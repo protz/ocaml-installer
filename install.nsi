@@ -1,5 +1,6 @@
 ; NSIS Installer script for OCaml
 ;
+;
 ; Original Author:
 ;   Jonathan Protzenko <jonathan.protzenko@ens-lyon.org>
 ;
@@ -40,6 +41,7 @@
 !include "EnvVarUpdate.nsh"
 !include "IfKeyExists.nsh"
 !include "MultiUser.nsh"
+!include "ReplaceInFile.nsh"
 
 Name "OCaml"
 OutFile "ocaml-${MUI_VERSION}-i686-mingw64.exe"
@@ -67,7 +69,7 @@ right packages pre-checked, so that all you have to do is click through the wiza
     and clunky.$\n\
   - You can also run Emacs, if you chose to install it. Once in Emacs, just hit \
     Alt-X, type run-caml, hit enter, and start playing with the toplevel.$\n\
-  - If you installed Cygwin, there should be a $\"Cygwin Shell$\" shortcut on your \
+  - If you installed Cygwin, there should be a $\"Cygwin Terminal$\" shortcut on your \
     desktop. You can open up a shell, and use ocamlfind, or ocamlopt from the \
     command line.$\n$\n\
   Enjoy!"
@@ -182,18 +184,15 @@ Section "OCaml" SecOCaml
   FileWrite $1 "$INSTDIR\lib\stublibs$\n"
   FileClose $1
 
+  ; Use the topfind template that's present in the ocaml-installer directory.
+  Delete "$INSTDIR\lib\topfind"
+  SetOutPath "$INSTDIR\lib"
+  File topfind
+
   ; Escape the install directory with the OCaml syntax (fingers crossed)
   ${StrRep} $0 "$INSTDIR" "\" "\\"
-
-  Delete "$INSTDIR\lib\topfind"
-  FileOpen  $1 "$INSTDIR\lib\topfind" w
-  FileWrite $1 "#load $\"$0\\lib\\site-lib\\findlib\\findlib.cma$\";;$\n"
-  FileWrite $1 "#load $\"$0\\lib\\site-lib\\findlib\\findlib_top.cma$\";;$\n"
-  FileWrite $1 "#directory $\"$0\\lib\\site-lib\\findlib$\";;$\n"
-  FileWrite $1 "Topfind.add_predicates [ $\"byte$\"; $\"toploop$\" ];$\n"
-  FileWrite $1 "Topfind.don't_load [ $\"findlib$\" ];$\n"
-  FileWrite $1 "Topfind.announce();;$\n"
-  FileClose $1
+  ; Replace the template with the right directory
+  !insertmacro _ReplaceInFile "$INSTDIR\lib\topfind" "@SITELIB@" "$0/lib/site-lib"
 
   Delete "$INSTDIR\etc\findlib.conf"
   FileOpen  $1 "$INSTDIR\etc\findlib.conf" w
@@ -327,7 +326,7 @@ Section "Cygwin" SecCygwin
   ExecWait "$DESKTOP\cygwin-setup.exe --quiet-mode \
     --local-package-dir=c:\cygtmp\ \
     --site=http://cygwin.cict.fr \
-    --packages=make,mingw64-i686-gcc-g++,mingw64-i686-gcc,patch,rlwrap,libreadline6,diffutils,wget,vim \
+    --packages=curl,make,mingw64-i686-gcc-g++,mingw64-i686-gcc,patch,rlwrap,libreadline6,diffutils,wget,vim \
     >NUL 2>&1"
 
   end:

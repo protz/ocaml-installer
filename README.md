@@ -15,7 +15,7 @@ Requirements
 
 * Cygwin with the mingw64 compiler suite, 32bit version (i686-w64-mingw32).
 * FlexDLL (at least 0.29)
-* NSIS
+* NSIS (the special build that uses 8k strings)
 * the NSISunz plugin for NSIS, that lives somewhere on the NSIS wiki
 
 Instructions for building an new version of the installer

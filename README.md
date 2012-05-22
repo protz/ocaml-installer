@@ -61,10 +61,11 @@ for another.
 Things to test for
 ------------------
 
-1. `rlwrap ocaml`, then `#use "topfind";;`
+1. `rlwrap ocaml`, then `#use "topfind";;`, then `#camlp4r;;`
 2. `ocamlfind ocamlc -package unix -linkpkg test.ml` where `test.ml` uses the
    `Unix` module, of course.
 3. `odb` on a sample package (e.g. `lwt`)
+4. `labltktop`, `ocamlbrowser`...
 
 Bugs, issues
 ------------

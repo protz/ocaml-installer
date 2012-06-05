@@ -63,13 +63,22 @@
             href="https://github.com/shadinger/opalang/wiki/Compiling-ocaml-MinGW64-w64">this
           link</a> for instructions.
         </p>
+        <p>
+        The OCaml binaries are compiled with mingw-w64 (they are native windows
+        programs), and <tt>ocamlopt</tt> generates native windows programs using
+        mingw-w64 as well. The OCaml binaries and the generated programs do not
+        depend on the MSVCRT (Microsoft C Runtime System). Cygwin is only used
+        as a development environment, so that <tt>ocamlbuild</tt> and other
+        tools work properly.
+        </p>
         <h2>Download</h2>
         <p>
           The installer has been tested on Windows XP, Windows 7, Windows 8.
         </p>
         <div class="myEyesHurt">
-          <a href="http://gallium.inria.fr/~protzenk/caml-installer/ocaml-4.00.0+beta1-i686-mingw64.exe">
-            Installer for OCaml 4.00.0 beta 1
+          <a
+            href="http://gallium.inria.fr/~protzenk/caml-installer/ocaml-4.00.0+beta2-i686-mingw64.exe">
+            Installer for OCaml 4.00.0 beta 2
           </a>
         </div>
         <h3>Other versions</h3>

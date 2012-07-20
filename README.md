@@ -27,7 +27,7 @@ for another.
 
 1. Install FlexDLL from Alain's website, and
     * `export PATH=/cygdrive/c/path/to/flexdll:$PATH`
-2. Refresh the files in the `flexdll/` directory of the installer, so that the
+2. Refresh the files in the `flexlink/` directory of the installer, so that the
    resulting installer ships the right version of flexdll (optional,
    recommended).
 2. Grab a copy of ActiveTCL and install it, leave the default path (`c:\tcl`).
@@ -38,12 +38,12 @@ for another.
 3. Go into the `emacs/` directory.
     * Make sure there's an `emacs.exe` in your path (install Emacs if you have to).
     * Configure the Makefile so that the output directory is
-      `/c/ocamlmgw/emacsfiles`.
+      `/cygdrive/c/ocamlmgw/emacsfiles`.
     * Run `make` in that directory.
 3. Checkout a copy of OCamlWin from the OCaml forge, edit Makefile.local and
    `make && make install`.
 3. Add `c:\ocamlmgw\bin` to your path, `configure` and `make` findlib.
-3. Copy findlib's `src/findlib/topfind.p` to `topfind` in the OCaml Installer
+3. Copy findlib's `src/findlib/topfind_rd1.p` to `topfind` in the OCaml Installer
    directory.
 4. Install NSIS, grab `nsisunz.dll` somewhere on the interwebs and put it NSIS's
    `Plugins` directory.
@@ -71,4 +71,4 @@ Bugs, issues
 ------------
 
 All patches should be submitted using GitHub pull requests. All issues should be
-filed using the GitHug issue tracker.
+filed using the GitHub issue tracker.

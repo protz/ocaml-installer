@@ -1,12 +1,14 @@
-(* $Id: topfind.p 152 2012-04-16 16:08:47Z gerd $ -*- tuareg -*- *)
+(* $Id: topfind_rd1.p 178 2012-07-09 09:20:31Z gerd $ -*- tuareg -*- *)
 
 (* For Ocaml-3.03 and up, so you can do: #use "topfind" and get a
  * working findlib toploop.
  *)
 
 #directory "@SITELIB@/findlib";;
-#directory "+compiler-libs";;
   (* OCaml-4.00 requires to have #directory before we load anything *)
+
+#directory "+compiler-libs";;
+  (* For OCaml-4.00. This directory will be later removed from path *)
 
 (* First test whether findlib_top is already loaded. If not, load it now.
  * The test works by executing the toplevel phrase "Topfind.reset" and
@@ -26,6 +28,8 @@ if not(exec_test "Topfind.reset;;") then (
   Topdirs.dir_load Format.err_formatter "@SITELIB@/findlib/findlib.cma";
   Topdirs.dir_load Format.err_formatter "@SITELIB@/findlib/findlib_top.cma";
 );;
+
+#remove_directory "+compiler-libs";;
 
 (* Old: *)
 (* #load "@SITELIB@/findlib/findlib.cma";; *)

@@ -45,7 +45,7 @@
 
 Name "OCaml"
 OutFile "ocaml-${MUI_VERSION}-i686-mingw64.exe"
-InstallDir "$PROGRAMFILES32\${MUI_PRODUCT}"
+InstallDir "C:\${MUI_PRODUCT}"
 
 !define MUI_WELCOMEPAGE_TITLE "Welcome to the OCaml setup for windows."
 !define MUI_WELCOMEPAGE_TEXT "This wizard will install OCaml ${MUI_VERSION}, \
@@ -96,6 +96,7 @@ Var STARTMENUFOLDER
   !insertmacro MUI_PAGE_STARTMENU Application $STARTMENUFOLDER
   !insertmacro MUI_PAGE_LICENSE ${ROOT_DIR}\License.txt
   !insertmacro MUI_PAGE_COMPONENTS
+  !define MUI_PAGE_CUSTOMFUNCTION_LEAVE "DirectoryLeave"
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
   !insertmacro MUI_PAGE_FINISH
@@ -116,12 +117,62 @@ Function .onInit
 
 FunctionEnd
 
+Function CheckForSpaces
+ Exch $R0
+ Push $R1
+ Push $R2
+ Push $R3
+ StrCpy $R1 -1
+ StrCpy $R3 $R0
+ StrCpy $R0 0
+ loop:
+   StrCpy $R2 $R3 1 $R1
+   IntOp $R1 $R1 - 1
+   StrCmp $R2 "" done
+   StrCmp $R2 " " 0 loop
+   IntOp $R0 $R0 + 1
+ Goto loop
+ done:
+ Pop $R3
+ Pop $R2
+ Pop $R1
+ Exch $R0
+FunctionEnd
+
+Function DirectoryLeave
+
+ # Call the CheckForSpaces function.
+ Push $INSTDIR # Input string (install path).
+  Call CheckForSpaces
+ Pop $R0 # The function returns the number of spaces found in the input string.
+
+ # Check if any spaces exist in $INSTDIR.
+ StrCmp $R0 0 NoSpaces
+
+   # Plural if more than 1 space in $INSTDIR.
+   StrCmp $R0 1 0 +3
+     StrCpy $R1 ""
+   Goto +2
+     StrCpy $R1 "s"
+
+   # Show message box then take the user back to the Directory page.
+   MessageBox MB_YESNO "The installation directory contains spaces. This is \
+     likely to cause problem with third-party packages.$\n\
+     Proceed anyway?" IDYES NoSpaces
+   Abort
+
+ NoSpaces:
+
+FunctionEnd
+
 Section "OCaml" SecOCaml
 
   ReadRegStr $1 SHCTX "SOFTWARE\OCaml" ""
 
   ${If} $1 != ""
-    MessageBox MB_YESNO "There seems to be a previous version of OCaml installed. It is strongly recommended you uninstall it before proceeding. Proceed anyway?" IDNO end
+    MessageBox MB_YESNO "There seems to be a previous version of OCaml \
+      installed. It is strongly recommended you uninstall it before proceeding.$\n\
+      Proceed anyway?" IDNO end
   ${EndIf}
 
   SetOutPath "$INSTDIR\bin"
@@ -241,7 +292,8 @@ Section "ActiveTcl ${ACTIVETCL_VERSION}" SecActiveTcl
     MessageBox MB_OK "Couldn't download the ActiveTCL installer: $R0"
     SetErrors
     DetailPrint $R0
-    DetailPrint "Please download the ActiveTCL installer from activestate.com. Just grab the latest free, 32-bit installer."
+    DetailPrint "Please download the ActiveTCL installer from activestate.com. \
+      Just grab the latest free, 32-bit installer."
     goto end
   ok:
 
@@ -311,7 +363,8 @@ SectionEnd
 
 Section "Cygwin" SecCygwin
   ${If} ${FileExists} "$DESKTOP\cygwin-setup.exe"
-    MessageBox MB_YESNO "There already is a file called cygwin-setup.exe on your desktop. Overwrite?" IDNO end
+    MessageBox MB_YESNO "There already is a file called cygwin-setup.exe on your \
+      desktop.$\nOverwrite?" IDNO end
   ${EndIf}
 
   NSISdl::download ${CYGWIN_URL} "$DESKTOP\cygwin-setup.exe"
@@ -326,7 +379,7 @@ Section "Cygwin" SecCygwin
   ExecWait "$DESKTOP\cygwin-setup.exe --quiet-mode \
     --local-package-dir=c:\cygtmp\ \
     --site=http://cygwin.cict.fr \
-    --packages=curl,make,mingw64-i686-gcc-g++,mingw64-i686-gcc,patch,rlwrap,libreadline6,diffutils,wget,vim \
+    --packages=curl,make,mingw64-i686-gcc-g++,mingw64-i686-gcc-core,mingw64-i686-gcc,patch,rlwrap,libreadline6,diffutils,wget,vim \
     >NUL 2>&1"
 
   end:
@@ -342,8 +395,8 @@ LangString DESC_SecActiveTcl ${LANG_ENGLISH} "ActiveTcl is distributed by \
 LangString DESC_SecEmacs ${LANG_ENGLISH} "Emacs is a text editor with excellent \
   OCaml support. This will download Emacs from the internet, and make sure the \
   OCaml specific scripts are properly installed."
-LangString DESC_SecCygwin ${LANG_ENGLISH} "Cygwin provides a Unix-like layer for \
-  Windows. This is required if you want to run scripts such as odb, or perform \
+LangString DESC_SecCygwin ${LANG_ENGLISH} "Cygwin provides a Unix-like layer. \
+  This is required if you want to run scripts such as odb, or perform \
   native-code compilation. This will download Cygwin's setup.exe to your desktop \
   as cygwin-setup.exe"
 

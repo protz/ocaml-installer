@@ -377,7 +377,7 @@ Section "Cygwin" SecCygwin
   ok:
 
   ExecWait "$DESKTOP\cygwin-setup.exe --quiet-mode \
-    --local-package-dir=c:\cygtmp\ \
+    --local-package-dir=$TEMP\cygwin\ \
     --site=http://cygwin.cict.fr \
     --packages=curl,make,mingw64-i686-gcc-g++,mingw64-i686-gcc-core,mingw64-i686-gcc,patch,rlwrap,libreadline6,diffutils,wget,vim \
     >NUL 2>&1"

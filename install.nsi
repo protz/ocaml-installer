@@ -342,10 +342,10 @@ LangString DESC_SecActiveTcl ${LANG_ENGLISH} "ActiveTcl is distributed by \
 LangString DESC_SecEmacs ${LANG_ENGLISH} "Emacs is a text editor with excellent \
   OCaml support. This will download Emacs from the internet, and make sure the \
   OCaml specific scripts are properly installed."
-LangString DESC_SecCygwin ${LANG_ENGLISH} "Cygwin provides a Unix-like layer on \
-  top of the Windows API. This is required if you want to run scripts such as odb, \
-  or perform native-code compilation. This will download Cygwin's setup.exe to \
-  your desktop as cygwin-setup.exe"
+LangString DESC_SecCygwin ${LANG_ENGLISH} "Cygwin provides a Unix-like layer for \
+  Windows. This is required if you want to run scripts such as odb, or perform \
+  native-code compilation. This will download Cygwin's setup.exe to your desktop \
+  as cygwin-setup.exe"
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecOCaml} $(DESC_SecOCaml)

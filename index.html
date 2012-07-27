@@ -20,7 +20,7 @@
   <!-- end CSS-->
 
   <script>
-    window.addEventListener("load", function () {
+    /*window.addEventListener("load", function () {
       (function f (p) {
         var div = document.getElementsByClassName("myEyesHurt")[0];
         if (p)
@@ -29,7 +29,7 @@
           div.setAttribute("class", "myEyesHurt");
         setTimeout(function () f(!p), 200);
       })(false);
-    }, false);
+    }, false);*/
   </script>
   <script src="js/libs/modernizr-2.0.6.min.js"></script>
 </head>
@@ -65,11 +65,10 @@
         </p>
         <h3>The full story</h3>
         <p>
-        See <a
-          href="http://gallium.inria.fr/~scherer/gagallium/the-ocaml-installer-for-windows">my
-          entry on the Gagallium blog</a> for the full details. Long story
-          short: this is a 32-bit build with the gcc compiler from the mingw-w64
-          project.
+        See <a href="http://gallium.inria.fr/~scherer/gagallium/the-ocaml-installer-for-windows">my
+        entry on the Gagallium blog</a> for the full details. Long story
+        short: this is a 32-bit build with the gcc compiler from the mingw-w64
+        project.
         </p>
         <ul>
           <li>The compiler binaries (<tt>ocamlc</tt>, <tt>ocamlopt</tt>, etc.)
@@ -80,6 +79,10 @@
             mingw-w64 (needed for <tt>ocamlopt</tt> to work properly),
             <tt>as</tt> (needed for <tt>ocamlopt</tt>) and other Unix tools
             required by <tt>ocamlbuild</tt> and others.</li>
+          <li>However, the mingw-w64 compilers are native windows programs.
+            Cygwin is only used because it has all the unix utilities and a
+            package management system.
+          </li>
         </ul>
         <p>
           If you already have Cygwin installed, just make sure the following

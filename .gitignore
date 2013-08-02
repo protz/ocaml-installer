@@ -2,3 +2,4 @@ version.nsh
 uninstall_lines.nsi
 *.byte
 _build/
+ocaml-*.exe

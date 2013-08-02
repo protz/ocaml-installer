@@ -254,6 +254,7 @@ Section "OCaml" SecOCaml
   FileWrite $1 "ocamlc=$\"ocamlc.opt$\"$\n"
   FileWrite $1 "ocamlopt=$\"ocamlopt.opt$\"$\n"
   FileWrite $1 "ocamldep=$\"ocamldep.opt$\"$\n"
+  FileWrite $1 "ocamldoc=$\"ocamldoc.opt$\"$\n"
   FileClose $1
 
   WriteRegExpandStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml" "UninstallString" "$INSTDIR\uninstall.exe"
@@ -292,6 +293,7 @@ Section "ActiveTcl ${ACTIVETCL_VERSION}" SecActiveTcl
     MessageBox MB_OK "Couldn't download the ActiveTCL installer: $R0"
     SetErrors
     DetailPrint $R0
+    DetailPrint "ActiveTCL is only required if you wish to use OCamlBrowser"
     DetailPrint "Please download the ActiveTCL installer from activestate.com. \
       Just grab the latest free, 32-bit installer."
     goto end

@@ -31,6 +31,7 @@ for another.
    resulting installer ships the right version of flexdll (optional,
    recommended).
 2. Grab a copy of ActiveTCL and install it, leave the default path (`c:\tcl`).
+   Make sure the URL in `install.nsi` is up-to-date.
 2. Grab a copy of the OCaml sources, and keep the default install path
    (`c:\ocamlmgw`), this will make your life easier.
 3. Follow the instructions in `README.Win32`, section "MinGW/Cygwin". Try to
@@ -42,13 +43,14 @@ for another.
     * Run `make` in that directory.
 3. Checkout a copy of OCamlWin from the OCaml forge, edit Makefile.local and
    `make && make install`.
-3. Add `c:\ocamlmgw\bin` to your path, `configure` and `make` findlib.
-3. Copy findlib's `src/findlib/topfind_rd1.p` to `topfind` in the OCaml Installer
+4. Make sure `/cygdrive/c/ocamlmgw/bin` is in your path.
+4. Grab the latest findlib, `configure`, `make all opt`, `make install`.
+4. Check that install.nsi will generate a correct `findlib.conf`
+4. Copy findlib's `src/findlib/topfind_rd1.p` to `topfind` in the OCaml Installer
    directory.
-4. Install NSIS, grab `nsisunz.dll` somewhere on the interwebs and put it NSIS's
+5. Install NSIS, grab `nsisunz.dll` somewhere on the interwebs and put it NSIS's
    `Plugins` directory.
-5. Make sure `/cygdrive/c/ocamlmgw/bin` is in your path.
-5. In the `ocaml-installer` directory (i.e. this repo), run `make`. This should
+6. In the `ocaml-installer` directory (i.e. this repo), run `make`. This should
    create a variety of files:
     * `version.nsh`, a NSIS header file that is generated to contain the freshly
       compiled OCaml's version number,

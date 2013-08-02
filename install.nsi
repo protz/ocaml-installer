@@ -20,6 +20,7 @@
 ; the OCaml Installer for Windows.  If not, see <http://www.gnu.org/licenses/>.
 
 ; -------------
+!define INSTALLER_VERSION "2"
 !define MUI_PRODUCT "OCaml"
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "installer-logo.bmp"
@@ -44,7 +45,7 @@
 !include "ReplaceInFile.nsh"
 
 Name "OCaml"
-OutFile "ocaml-${MUI_VERSION}-i686-mingw64.exe"
+OutFile "ocaml-${MUI_VERSION}-i686-mingw64-installer${INSTALLER_VERSION}.exe"
 InstallDir "C:\${MUI_PRODUCT}"
 
 !define MUI_WELCOMEPAGE_TITLE "Welcome to the OCaml setup for windows."

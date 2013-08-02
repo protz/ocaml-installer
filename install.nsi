@@ -378,9 +378,10 @@ Section "Cygwin" SecCygwin
     DetailPrint "$0"
   ok:
 
+  ; We used to have --site=http://cygwin.cict.fr but since the mirror list
+  ; changes quite often, it's safer to let the user pick their preferred mirror.
   ExecWait "$DESKTOP\cygwin-setup.exe --quiet-mode \
     --local-package-dir=$TEMP\cygwin\ \
-    --site=http://cygwin.cict.fr \
     --packages=curl,make,mingw64-i686-gcc-g++,mingw64-i686-gcc-core,mingw64-i686-gcc,patch,rlwrap,libreadline6,diffutils,wget,vim \
     >NUL 2>&1"
 

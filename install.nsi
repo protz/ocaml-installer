@@ -25,8 +25,8 @@
 !define MUI_HEADERIMAGE_BITMAP "installer-logo.bmp"
 !define MUI_ICON "ocaml-icon.ico"
 ; this must match the activetcl version ocaml was compiled against
-!define ACTIVETCL_VERSION "8.5.11.1"
-!define ACTIVETCL_URL "http://downloads.activestate.com/ActiveTcl/releases/8.5.11.1/ActiveTcl8.5.11.1.295590-win32-ix86-threaded.exe"
+!define ACTIVETCL_VERSION "8.5.14.0"
+!define ACTIVETCL_URL "http://www.activestate.com/activetcl/downloads/thank-you?dl=http://downloads.activestate.com/ActiveTcl/releases/8.5.14.0/ActiveTcl8.5.14.0.296777-win32-ix86-threaded.exe"
 !define EMACS_URL "http://ftp.gnu.org/gnu/emacs/windows/emacs-23.3-bin-i386.zip"
 ;!define EMACS_URL "http://yquem/~protzenk/emacs-23.3-bin-i386.zip"
 !define EMACS_VER "23.3"

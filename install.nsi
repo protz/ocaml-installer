@@ -20,7 +20,7 @@
 ; the OCaml Installer for Windows.  If not, see <http://www.gnu.org/licenses/>.
 
 ; -------------
-!define INSTALLER_VERSION "2"
+!define INSTALLER_VERSION "3"
 !define MUI_PRODUCT "OCaml"
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "installer-logo.bmp"
@@ -31,7 +31,7 @@
 !define EMACS_URL "http://ftp.gnu.org/gnu/emacs/windows/emacs-23.3-bin-i386.zip"
 ;!define EMACS_URL "http://yquem/~protzenk/emacs-23.3-bin-i386.zip"
 !define EMACS_VER "23.3"
-!define CYGWIN_URL "http://cygwin.com/setup.exe"
+!define CYGWIN_URL "http://cygwin.com/setup-x86.exe"
 !define ROOT_DIR "c:\ocamlmgw" ; the directory where your binary dist of ocaml lives
 
 !define MULTIUSER_EXECUTIONLEVEL Highest

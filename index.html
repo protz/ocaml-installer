@@ -47,21 +47,12 @@
           There are several ways to compile and distribute OCaml on Windows.
           This installer will:
           <ul>
-            <li>install OCaml, <tt>findlib</tt> and <tt>flexdll</tt></li>
-            <li>(optional) install Emacs with the caml-mode setup and
-              the right file associations in the Windows explorer,</li>
-            <li>(optional) install ActiveTCL so that OCamlBrowser and labltk can
-              work properly</li>
+            <li>install OCaml, <tt>findlib</tt>, <tt>camlp4</tt>,
+              <tt>flexdll</tt> and batteries</li>
             <li>(optional) launch the cygwin setup with the right packages
               pre-configured so that you have a working OCaml development
               environment.</li>
           </ul>
-          Working inside a MSys environment is no longer officially supported,
-          so the installer now supports Cygwin. It is still possible to get
-          OCaml to run inside a MSys/MinGW environment, but you're on your own.
-          See <a
-            href="https://github.com/shadinger/opalang/wiki/Compiling-ocaml-MinGW64-w64">this
-          link</a> for instructions.
         </p>
         <h3>The full story</h3>
         <p>
@@ -96,12 +87,18 @@
         </p>
         <div class="myEyesHurt">
           <a
-            href="http://gallium.inria.fr/~protzenk/caml-installer/ocaml-4.01.0-i686-mingw64-installer3.exe">
-            Installer for OCaml 4.01.0
+            href="http://gallium.inria.fr/~protzenk/caml-installer/ocaml-4.02.1-i686-mingw64-installer3.exe">
+            Installer for OCaml 4.02.1
           </a>
         </div>
         <h3>Other versions</h3>
         <ul>
+          <li>
+            <a
+              href="http://gallium.inria.fr/~protzenk/caml-installer/ocaml-4.01.0-i686-mingw64-installer3.exe">
+              Installer for OCaml 4.01.0
+            </a>
+          </li>
           <li><a
             href="http://yquem.inria.fr/~protzenk/caml-installer/ocaml-4.00.1-i686-mingw64-installer3.exe">OCaml
             4.00.1
@@ -121,6 +118,9 @@
         </ul>
         <h2>Changes</h2>
         <ul>
+          <li>No longer package Emacs and ActiveTCL (too much work, unsure that
+            actually benefited anyone). Let me know if that broke things for
+            you.
           <li>Don't override the <tt>PATH</tt> variable anymore</li>
           <li>Switch to the latest <tt>i686-mingw32-w64</tt> toolchain (the
           32-bit compiler from the mingw-w64 project)</li>

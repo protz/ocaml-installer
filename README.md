@@ -36,6 +36,10 @@ for another.
    (`c:\ocamlmgw`), this will make your life easier.
 3. Follow the instructions in `README.Win32`, section "MinGW/Cygwin". Try to
    compile OCaml. Swear. Try again. Grab a tea. Succeed. Be happy.
+4. Make sure `/cygdrive/c/ocamlmgw/bin` is in your path.
+3. Clone camlp4, apply the
+   [patch](https://github.com/ocaml/camlp4/issues/41#issuecomment-55229048) for
+   Windows, `configure` `make all` and `make install`
 3. Go into the `emacs/` directory.
     * Make sure there's an `emacs.exe` in your path (install Emacs if you have to).
     * Configure the Makefile so that the output directory is
@@ -43,7 +47,6 @@ for another.
     * Run `make` in that directory.
 3. Checkout a copy of OCamlWin from the OCaml forge, edit Makefile.local and
    `make && make install`.
-4. Make sure `/cygdrive/c/ocamlmgw/bin` is in your path.
 4. Grab the latest findlib, `configure`, `make all opt`, `make install`.
 4. Check that install.nsi will generate a correct `findlib.conf`
 4. Copy findlib's `src/findlib/topfind_rd1.p` to `topfind` in the OCaml Installer

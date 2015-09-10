@@ -35,12 +35,6 @@
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "installer-logo.bmp"
 !define MUI_ICON "ocaml-icon.ico"
-; this must match the activetcl version ocaml was compiled against
-!define ACTIVETCL_VERSION "8.5.14.0"
-!define ACTIVETCL_URL "http://downloads.activestate.com/ActiveTcl/releases/8.5.14.0/ActiveTcl8.5.14.0.296777-win32-ix86-threaded.exe"
-!define EMACS_URL "http://ftp.gnu.org/gnu/emacs/windows/emacs-23.3-bin-i386.zip"
-;!define EMACS_URL "http://yquem/~protzenk/emacs-23.3-bin-i386.zip"
-!define EMACS_VER "23.3"
 !define CYGWIN_URL "http://cygwin.com/setup-x86.exe"
 !define ROOT_DIR "c:\ocamlmgw" ; the directory where your binary dist of ocaml lives
 
@@ -62,26 +56,18 @@ InstallDir "C:\${MUI_PRODUCT}"
 !define MUI_WELCOMEPAGE_TEXT "This wizard will install OCaml ${MUI_VERSION}, \
 as well as findlib (package management tool) and flexdll (prerequisite for \
 compiling native code).$\n$\n\
-The installer can install the following extra components for you:$\n\
-- Emacs, a text editor, with support for OCaml. This will also create the right \
-associations in Window's file explorer.$\n\
-- ActiveTCL, a GUI library that is required if you want to use OCamlBrowser, or \
-create graphical user interfaces using the Tcl/Tk bindings (labltk).$\n\
-- Cygwin, a Unix layer on top of windows. This is required if you want to \
-perform native compilation. This wizard will launch Cygwin's setup.exe with the \
-right packages pre-checked, so that all you have to do is click through the wizard."
+The installer can install Cygwin, a Unix layer on top of windows. This is required if you want to \
+perform native compilation or use opam. If you already have Cygwin, this wizard \
+will just launch Cygwin's setup.exe with the right packages pre-checked, so \
+that all you have to do is click through the wizard."
 !define MUI_LICENSEPAGE_TEXT_TOP "OCaml is distributed under a modified QPL license."
 !define MUI_LICENSEPAGE_TEXT_BOTTOM "You must agree with the terms of the license below before installing OCaml."
 !define MUI_COMPONENTSPAGE_TEXT_COMPLIST "All the components below will be downloaded off the internet, and their own installers will be launched."
 !define MUI_FINISHPAGE_TITLE "Congratulations! You have installed OCaml"
 !define MUI_FINISHPAGE_TEXT "You can now play with OCaml. Start menu entries and \
   desktop shortcuts have been created. $\n$\n\
-  - You can run OCamlWin, which is old \
-    and clunky.$\n\
-  - You can also run Emacs, if you chose to install it. Once in Emacs, just hit \
-    Alt-X, type run-caml, hit enter, and start playing with the toplevel.$\n\
   - If you installed Cygwin, there should be a $\"Cygwin Terminal$\" shortcut on your \
-    desktop. You can open up a shell, and use ocamlfind, or ocamlopt from the \
+    desktop. You can open up a shell, and use opam, or ocamlopt from the \
     command line.$\n$\n\
   Enjoy!"
 !define MUI_WELCOMEFINISHPAGE_BITMAP "side.bmp"
@@ -196,13 +182,10 @@ Section "OCaml" SecOCaml
 
   File ocaml-icon.ico
   File onlinedoc.url
-  File ${ROOT_DIR}\Changes.txt
   File ${ROOT_DIR}\License.txt
-  File ${ROOT_DIR}\OCamlWin.exe
   File /r ${ROOT_DIR}\bin
   File /r ${ROOT_DIR}\etc
   File /r ${ROOT_DIR}\lib
-  File /r ${ROOT_DIR}\man
 
   ${If} $MultiUser.InstallMode == "AllUsers"
     ; This is for the OCamlWin thing
@@ -277,98 +260,11 @@ Section "OCaml" SecOCaml
 
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     CreateDirectory "$SMPROGRAMS\$STARTMENUFOLDER"
-    CreateShortCut "$SMPROGRAMS\$STARTMENUFOLDER\OCamlWin.lnk" "$INSTDIR\OCamlWin.exe"
     CreateShortCut "$SMPROGRAMS\$STARTMENUFOLDER\Uninstall.lnk" "$INSTDIR\uninstall.exe"
-    CreateShortCut "$SMPROGRAMS\$STARTMENUFOLDER\OCamlBrowser.lnk" "$INSTDIR\bin\ocamlbrowser.exe"
     CreateShortCut "$SMPROGRAMS\$STARTMENUFOLDER\Online Documentation.lnk" "$INSTDIR\onlinedoc.url"
   !insertmacro MUI_STARTMENU_WRITE_END
 
   WriteUninstaller $INSTDIR\uninstall.exe
-
-  end:
-
-SectionEnd
-
-Section "ActiveTcl ${ACTIVETCL_VERSION}" SecActiveTcl
-
-  ReadRegStr $1 HKLM "SOFTWARE\ActiveState\ActiveTcl" "CurrentVersion"
-
-  ${If} $1 == ${ACTIVETCL_VERSION}
-    MessageBox MB_YESNO "You already seem to have ActiveTcl ${ACTIVETCL_VERSION} installed. Download and install ActiveTcl anyway?" IDNO end
-  ${EndIf}
-
-  NSISdl::download ${ACTIVETCL_URL} "$TEMP\activetcl.exe"
-
-  Pop $R0
-  StrCmp $R0 "success" ok
-    MessageBox MB_OK "Couldn't download the ActiveTCL installer: $R0"
-    SetErrors
-    DetailPrint $R0
-    DetailPrint "ActiveTCL is only required if you wish to use OCamlBrowser"
-    DetailPrint "Please download the ActiveTCL installer from activestate.com. \
-      Just grab the latest free, 32-bit installer."
-    goto end
-  ok:
-
-  ExecWait "$TEMP\activetcl.exe"
-
-  end:
-
-SectionEnd
-
-Section "Emacs ${EMACS_VER}" SecEmacs
-
-  ${If} ${FileExists} "$INSTDIR\emacs-${EMACS_VER}"
-    MessageBox MB_YESNO "There seems to be an Emacs living in that directory already... overwrite?" IDNO end
-  ${EndIf}
-
-  NSISdl::download ${EMACS_URL} "$TEMP\emacs.zip"
-
-  Pop $0
-  StrCmp $0 "success" ok
-    MessageBox MB_OK "Couldn't download the Emacs zip: $0"
-    SetErrors
-    DetailPrint "$0"
-  ok:
-
-  nsisunz::UnzipToLog "$TEMP\emacs.zip" "$INSTDIR"
-
-  ; add the caml-mode in the emacs distribution
-
-  SetOutPath "$INSTDIR\emacs-${EMACS_VER}\site-lisp\caml-mode"
-  File ${ROOT_DIR}\emacsfiles\*
-  SetOutPath "$INSTDIR\emacs-${EMACS_VER}\site-lisp"
-  File site-start.el
-
-  ; register file types, add emacs bin directory to the path
-
-  ${If} $MultiUser.InstallMode == "AllUsers"
-    ${EnvVarUpdate} $0 "PATH" "P" "HKLM" "$INSTDIR\emacs-${EMACS_VER}\bin"
-  ${ElseIf} $MultiUser.InstallMode == "CurrentUser"
-    ${EnvVarUpdate} $0 "PATH" "P" "HKCU" "$INSTDIR\emacs-${EMACS_VER}\bin"
-  ${Else}
-    SetErrors
-    DetailPrint "Error: $MultiUser.InstallMode unexpected value"
-  ${EndIf}
-
-
-  WriteRegStr HKCR ".mli" "" "OCaml.mli"
-  WriteRegStr HKCR "OCaml.mli" "" "OCaml Interface File"
-  WriteRegStr HKCR "OCaml.mli\DefaultIcon" "" "$INSTDIR\ocaml-icon.ico"
-  WriteRegStr HKCR "OCaml.mli\shell" "" "open"
-  WriteRegStr HKCR "OCaml.mli\shell\open\command" "" '$INSTDIR\emacs-${EMACS_VER}\bin\runemacs.exe "%1"'
-
-  WriteRegStr HKCR ".ml" "" "OCaml.ml"
-  WriteRegStr HKCR "OCaml.ml" "" "OCaml Implementation File"
-  WriteRegStr HKCR "OCaml.ml\DefaultIcon" "" "$INSTDIR\ocaml-icon.ico"
-  WriteRegStr HKCR "OCaml.ml\shell" "" "open"
-  WriteRegStr HKCR "OCaml.ml\shell\open\command" "" '$INSTDIR\emacs-${EMACS_VER}\bin\runemacs.exe "%1"'
-
-  System::Call 'Shell32::SHChangeNotify(i ${SHCNE_ASSOCCHANGED}, i ${SHCNF_IDLIST}, i 0, i 0)'
-
-  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-    CreateShortCut "$SMPROGRAMS\$STARTMENUFOLDER\Emacs.lnk" "$INSTDIR\emacs-${EMACS_VER}\bin\runemacs.exe"
-  !insertmacro MUI_STARTMENU_WRITE_END
 
   end:
 
@@ -401,14 +297,8 @@ Section "Cygwin" SecCygwin
 SectionEnd
 
 LangString DESC_SecOCaml ${LANG_ENGLISH} "This contains the main OCaml \
-  distribution, including all OCaml compilers, ocamlbuild, ocamldoc, ocamlbrowser, \
-  labltk, ocamlfind, and flexlink for the mingw toolchain."
-LangString DESC_SecActiveTcl ${LANG_ENGLISH} "ActiveTcl is distributed by \
-  ActiveState and provides the graphical required libraries to run ocamlbrowser, \
-  as well as your own graphical programs if you choose so."
-LangString DESC_SecEmacs ${LANG_ENGLISH} "Emacs is a text editor with excellent \
-  OCaml support. This will download Emacs from the internet, and make sure the \
-  OCaml specific scripts are properly installed."
+  distribution, including all OCaml compilers, ocamlbuild, ocamldoc, \
+  findlib, and flexlink for the mingw toolchain."
 LangString DESC_SecCygwin ${LANG_ENGLISH} "Cygwin provides a Unix-like layer. \
   This is required if you want to run scripts such as odb, or perform \
   native-code compilation. This will download Cygwin's setup.exe to your desktop \
@@ -416,8 +306,6 @@ LangString DESC_SecCygwin ${LANG_ENGLISH} "Cygwin provides a Unix-like layer. \
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecOCaml} $(DESC_SecOCaml)
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecActiveTcl} $(DESC_SecActiveTcl)
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecEmacs} $(DESC_SecEmacs)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecCygwin} $(DESC_SecCygwin)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
@@ -431,36 +319,6 @@ FunctionEnd
 
 Section "Uninstall"
 
-  ${If} ${FileExists} "$INSTDIR\emacs-${EMACS_VER}"
-    MessageBox MB_YESNO "Also uninstall Emacs ${EMACS_VER}?" IDNO next
-
-    ${If} $MultiUser.InstallMode == "AllUsers"
-      ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\emacs-${EMACS_VER}\bin"
-    ${ElseIf} $MultiUser.InstallMode == "CurrentUser"
-      ${un.EnvVarUpdate} $0 "PATH" "R" "HKCU" "$INSTDIR\emacs-${EMACS_VER}\bin"
-    ${Else}
-      SetErrors
-      DetailPrint "Error: $MultiUser.InstallMode unexpected value"
-    ${EndIf}
-
-    RMDir /r "$INSTDIR\emacs-${EMACS_VER}"
-
-    ReadRegStr $R0 HKCR ".mli" ""
-    StrCmp $R0 "OCaml.mli" 0 +2
-      DeleteRegKey HKCR ".mli"
-
-    ReadRegStr $R0 HKCR ".ml" ""
-    StrCmp $R0 "OCaml.ml" 0 +2
-      DeleteRegKey HKCR ".ml"
-
-    DeleteRegKey HKCR "OCaml.ml"
-    DeleteRegKey HKCR "OCaml.mli"
-
-    System::Call 'Shell32::SHChangeNotify(i ${SHCNE_ASSOCCHANGED}, i ${SHCNF_IDLIST}, i 0, i 0)'
-  ${EndIf}
-
-  next:
-
   ; The rationale is that users might install this in their Program Files
   ; directory, so we can't blindy remove the INSTDIR...
   Delete "$INSTDIR\bin\flexlink.exe"
@@ -471,18 +329,13 @@ Section "Uninstall"
 
   Delete "$INSTDIR\ocaml-icon.ico"
   Delete "$INSTDIR\onlinedoc.url"
-  Delete "$INSTDIR\Changes.txt"
   Delete "$INSTDIR\License.txt"
-  Delete "$INSTDIR\OCamlWin.exe"
   Delete "$INSTDIR\ld.conf"
   Delete "$INSTDIR\uninstall.exe"
   !include uninstall_lines.nsi
   RMDir "$INSTDIR"
 
   !insertmacro MUI_STARTMENU_GETFOLDER Application $STARTMENUFOLDER
-  Delete "$SMPROGRAMS\$STARTMENUFOLDER\OCamlWin.lnk"
-  Delete "$SMPROGRAMS\$STARTMENUFOLDER\OCamlBrowser.lnk"
-  Delete "$SMPROGRAMS\$STARTMENUFOLDER\Emacs.lnk"
   Delete "$SMPROGRAMS\$STARTMENUFOLDER\Online Documentation.lnk"
   Delete "$SMPROGRAMS\$STARTMENUFOLDER\Uninstall.lnk"
   RMDir "$SMPROGRAMS\$STARTMENUFOLDER"

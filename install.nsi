@@ -30,7 +30,7 @@
 ; THE SOFTWARE.
 
 ; -------------
-!define INSTALLER_VERSION "3"
+!define INSTALLER_VERSION "4"
 !define MUI_PRODUCT "OCaml"
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "installer-logo.bmp"

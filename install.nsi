@@ -49,12 +49,12 @@
 !include "ReplaceInFile.nsh"
 
 Name "OCaml"
-OutFile "ocaml-${MUI_VERSION}-i686-mingw64-installer${INSTALLER_VERSION}.exe"
+OutFile "ocaml-${MUI_VERSION}-i686-mingw64-installer${INSTALLER_VERSION}-opam.exe"
 InstallDir "C:\${MUI_PRODUCT}"
 
 !define MUI_WELCOMEPAGE_TITLE "Welcome to the OCaml setup for windows."
 !define MUI_WELCOMEPAGE_TEXT "This wizard will install OCaml ${MUI_VERSION}, \
-as well as findlib (package management tool) and flexdll (prerequisite for \
+as well as opam (package management tool) and flexdll (prerequisite for \
 compiling native code).$\n$\n\
 The installer can install Cygwin, a Unix layer on top of windows. This is required if you want to \
 perform native compilation or use opam. If you already have Cygwin, this wizard \
@@ -184,7 +184,6 @@ Section "OCaml" SecOCaml
   File onlinedoc.url
   File ${ROOT_DIR}\License.txt
   File /r ${ROOT_DIR}\bin
-  File /r ${ROOT_DIR}\etc
   File /r ${ROOT_DIR}\lib
 
   ${If} $MultiUser.InstallMode == "AllUsers"
@@ -194,7 +193,6 @@ Section "OCaml" SecOCaml
     WriteRegStr HKLM "Software\OCaml" "" $INSTDIR
     ; We want to overwrite that one anyway for the new setup to work properly.
     WriteRegStr HKLM ${env_all} "OCAMLLIB" "$INSTDIR\lib"
-    WriteRegStr HKLM ${env_all} "OCAMLFIND_CONF" "$INSTDIR\etc\findlib.conf"
     ${EnvVarUpdate} $0 "PATH" "P" "HKLM" "$INSTDIR\bin"
   ${ElseIf} $MultiUser.InstallMode == "CurrentUser"
      ; This is for the OCamlWin thing
@@ -203,7 +201,6 @@ Section "OCaml" SecOCaml
     WriteRegStr HKCU "Software\OCaml" "" $INSTDIR
     ; We want to overwrite that one anyway for the new setup to work properly.
     WriteRegStr HKCU ${env_current} "OCAMLLIB" "$INSTDIR\lib"
-    WriteRegStr HKCU ${env_current} "OCAMLFIND_CONF" "$INSTDIR\etc\findlib.conf"
 
     ; EnvVarUpdate won't work if PATH doesn't exist or is empty...
     !insertmacro IfKeyExists "HKLM" ${env_current} "PATH"
@@ -227,28 +224,6 @@ Section "OCaml" SecOCaml
   FileOpen  $1 "$INSTDIR\lib\ld.conf" w
   FileWrite $1 "$INSTDIR\lib$\n"
   FileWrite $1 "$INSTDIR\lib\stublibs$\n"
-  FileClose $1
-
-  ; Use the topfind template that's present in the ocaml-installer directory.
-  Delete "$INSTDIR\lib\topfind"
-  SetOutPath "$INSTDIR\lib"
-  File topfind
-
-  ; Escape the install directory with the OCaml syntax (fingers crossed)
-  ${StrRep} $0 "$INSTDIR" "\" "\\"
-  ; Replace the template with the right directory
-  !insertmacro _ReplaceInFile "$INSTDIR\lib\topfind" "@SITELIB@" "$0/lib/site-lib"
-
-  Delete "$INSTDIR\etc\findlib.conf"
-  FileOpen  $1 "$INSTDIR\etc\findlib.conf" w
-  FileWrite $1 "destdir=$\"$0\\lib\\site-lib$\"$\n"
-  FileWrite $1 "path=$\"$0\\lib\\site-lib$\"$\n"
-  FileWrite $1 "stdlib=$\"$0\\lib$\"$\n"
-  FileWrite $1 "ldconf=$\"$0\\lib\\ld.conf$\"$\n"
-  FileWrite $1 "ocamlc=$\"ocamlc.opt$\"$\n"
-  FileWrite $1 "ocamlopt=$\"ocamlopt.opt$\"$\n"
-  FileWrite $1 "ocamldep=$\"ocamldep.opt$\"$\n"
-  FileWrite $1 "ocamldoc=$\"ocamldoc.opt$\"$\n"
   FileClose $1
 
   WriteRegExpandStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\OCaml" "UninstallString" "$INSTDIR\uninstall.exe"
@@ -298,7 +273,7 @@ SectionEnd
 
 LangString DESC_SecOCaml ${LANG_ENGLISH} "This contains the main OCaml \
   distribution, including all OCaml compilers, ocamlbuild, ocamldoc, \
-  findlib, and flexlink for the mingw toolchain."
+  opam, and flexlink for the mingw toolchain."
 LangString DESC_SecCygwin ${LANG_ENGLISH} "Cygwin provides a Unix-like layer. \
   This is required if you want to run scripts such as odb, or perform \
   native-code compilation. This will download Cygwin's setup.exe to your desktop \
@@ -356,12 +331,6 @@ Section "Uninstall"
       DeleteRegValue HKLM ${env_all} "OCAMLLIB"
     ${EndUnless}
 
-    ; OCAMLFIND_CONF
-    ReadRegStr $R1 HKLM ${env_all} "OCAMLFIND_CONF"
-    ${Unless} $R1 != "$INSTDIR\etc\findlib.conf"
-      DeleteRegValue HKLM ${env_all} "OCAMLFIND_CONF"
-    ${EndUnless}
-
     ReadRegStr $R1 HKLM "SOFTWARE\OCaml" ""
     ${Unless} $R1 != $INSTDIR
       DeleteRegKey /ifempty HKLM "SOFTWARE\OCaml"
@@ -388,12 +357,6 @@ Section "Uninstall"
     ReadRegStr $R1 HKCU ${env_current} "OCAMLLIB"
     ${Unless} $R1 != "$INSTDIR\lib"
       DeleteRegValue HKCU ${env_current} "OCAMLLIB"
-    ${EndUnless}
-
-    ; OCAMLFIND_CONF
-    ReadRegStr $R1 HKCU ${env_current} "OCAMLFIND_CONF"
-    ${Unless} $R1 != "$INSTDIR\etc\findlib.conf"
-      DeleteRegValue HKCU ${env_current} "OCAMLFIND_CONF"
     ${EndUnless}
 
     ReadRegStr $R1 HKCU "SOFTWARE\OCaml" ""

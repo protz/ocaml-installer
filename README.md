@@ -25,13 +25,13 @@ The instructions above sometimes use the `c:\...`-style paths, sometimes the
 `/c/...`-style paths. This is significant, and you cannot blindly replace one
 for another.
 
+Simplified instructions.
+
 1. Install FlexDLL from Alain's website, and
     * `export PATH=/cygdrive/c/path/to/flexdll:$PATH`
 2. Refresh the files in the `flexlink/` directory of the installer, so that the
    resulting installer ships the right version of flexdll (optional,
    recommended).
-2. Grab a copy of ActiveTCL and install it, leave the default path (`c:\tcl`).
-   Make sure the URL in `install.nsi` is up-to-date.
 2. Grab a copy of the OCaml sources, and keep the default install path
    (`c:\ocamlmgw`), this will make your life easier.
 3. Follow the instructions in `README.Win32`, section "MinGW/Cygwin". Try to
@@ -40,37 +40,24 @@ for another.
 3. Clone camlp4, apply the
    [patch](https://github.com/ocaml/camlp4/issues/41#issuecomment-55229048) for
    Windows, `configure` `make all` and `make install`
-3. Go into the `emacs/` directory.
-    * Make sure there's an `emacs.exe` in your path (install Emacs if you have to).
-    * Configure the Makefile so that the output directory is
-      `/cygdrive/c/ocamlmgw/emacsfiles`.
-    * Run `make` in that directory.
-3. Checkout a copy of OCamlWin from the OCaml forge, edit Makefile.local and
-   `make && make install`.
-4. Grab the latest findlib, `configure`, `make all opt`, `make install`.
-4. Check that install.nsi will generate a correct `findlib.conf`
-4. Copy findlib's `src/findlib/topfind_rd1.p` to `topfind` in the OCaml Installer
-   directory.
 5. Install NSIS, grab `nsisunz.dll` somewhere on the interwebs and put it NSIS's
    `Plugins` directory.
+6. Change your PATH so that ocaml is /usr/bin/ocaml (cygwin's ocaml) and
+   flexlink is /usr/bin/flexlink (cygwin's flexlink)
+6. Download opam; `./configure --prefix=/cygdrive/c/ocamlmgw/`; `make lib-ext`;
+   `make`; `make install`.
 6. In the `ocaml-installer` directory (i.e. this repo), run `make`. This should
    create a variety of files:
     * `version.nsh`, a NSIS header file that is generated to contain the freshly
       compiled OCaml's version number,
     * `uninstall_lines.nsi`, an OCaml-generated list of files to remove from the
       install directory.
-6. Make should also launch NSIS with the main script file, and hopefully it
-   should all generate an installer. The installer is quite big (thank you
-   camlp4).
+6. This will also launch nsis.
 
 Things to test for
 ------------------
 
-1. `rlwrap ocaml`, then `#use "topfind";;`, then `#camlp4r;;`
-2. `ocamlfind ocamlc -package unix -linkpkg test.ml` where `test.ml` uses the
-   `Unix` module, of course.
-3. `odb` on a sample package (e.g. `lwt`)
-4. `labltktop`, `ocamlbrowser`...
+1. `opam init`, `opam install mezzo`, `ocamlfind list`, etc.
 
 Bugs, issues
 ------------

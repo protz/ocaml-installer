@@ -238,6 +238,7 @@ Section "OCaml" SecOCaml
   ${StrRep} $0 "$INSTDIR" "\" "\\"
   ; Replace the template with the right directory
   !insertmacro _ReplaceInFile "$INSTDIR\lib\topfind" "@SITELIB@" "$0/lib/site-lib"
+  Delete "$INSTDIR\lib\topfind.old"
 
   Delete "$INSTDIR\etc\findlib.conf"
   FileOpen  $1 "$INSTDIR\etc\findlib.conf" w

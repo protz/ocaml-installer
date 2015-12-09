@@ -1,0 +1,43 @@
+diff --git a/configure b/configure
+index 6e02c7d..0651eee 100755
+--- a/configure
++++ b/configure
+@@ -4741,7 +4741,7 @@ if test "x${enable_certificate_check}" = "xno"; then :
+ 
+ fi
+ 
+-for ac_prog in curl wget
++for ac_prog in wget
+ do
+   # Extract the first word of "$ac_prog", so it can be a program name with args.
+ set dummy $ac_prog; ac_word=$2
+diff --git a/src/repository/opamRepositoryBackend.ml b/src/repository/opamRepositoryBackend.ml
+index 22c0480..d83dfc7 100644
+--- a/src/repository/opamRepositoryBackend.ml
++++ b/src/repository/opamRepositoryBackend.ml
+@@ -38,7 +38,7 @@ let to_string r =
+ let default_url = {
+   OpamUrl.
+   transport = "https";
+-  path = "opam.ocaml.org";
++  path = "github.com/fdopen/opam-repository-mingw.git";
+   hash = None;
+   backend = `http;
+ }
+diff --git a/src/repository/opamRepositoryConfig.ml b/src/repository/opamRepositoryConfig.ml
+index 240ae80..cb0b24f 100644
+--- a/src/repository/opamRepositoryConfig.ml
++++ b/src/repository/opamRepositoryConfig.ml
+@@ -32,11 +32,7 @@ type 'a options_fun =
+ let default = {
+   download_tool = lazy (
+     try
+-      let tools =
+-        if OpamStd.Sys.(os () = Darwin)
+-        then ["wget", `Default; "curl", `Curl]
+-        else ["curl", `Curl; "wget", `Default]
+-      in
++      let tools = ["wget", `Default] in
+       let cmd, kind =
+         List.find (fun (c,_) -> OpamSystem.command_exists c) tools
+       in

@@ -34,18 +34,29 @@ Simplified instructions.
    recommended).
 2. Grab a copy of the OCaml sources, and keep the default install path
    (`c:\ocamlmgw`), this will make your life easier.
-3. Follow the instructions in `README.Win32`, section "MinGW/Cygwin". Try to
+3. Follow the instructions in `README.Win32`, section "MinGW64/Cygwin". Try to
    compile OCaml. Swear. Try again. Grab a tea. Succeed. Be happy.
-4. Make sure `/cygdrive/c/ocamlmgw/bin` is in your path.
+4. Make sure `/cygdrive/c/ocamlmgw64/bin` is in your path.
 3. Clone camlp4, apply the
    [patch](https://github.com/ocaml/camlp4/issues/41#issuecomment-55229048) for
    Windows, `configure` `make all` and `make install`
+3. Make a copy of this repository into `ocamlmgw64-fresh`.
+6. Checkout [David Allsop's OPAM fork](https://github.com/dra27/opam/tree/windows);
+   cherry-pick the `windows-temp` commit (single commit). Apply the
+   `patch-opam-dra27` file (forces wget + and makes opam init point to
+   https://github.com/fdopen/opam-repository-mingw by default).
+6. Try to install the dependencies needed for opam. Either from
+   [Thomas' script](https://github.com/braibant/ocaml-windows-bootstrap) or possibly
+   from the new targets of `dra27/opam` (?). Note to self: Thomas' script
+   hardcodes i686 instead of x86_64 in quite a few places. Do a
+   search-and-replace for that and also `s/ocamlmgw/ocamlmgw64`.
+6. Look into Thomas' script to figure out which variables to export to build
+   opam correctly. Build opam.
+6. Move `ocamlmgw64-fresh` to `ocamlmgw64` and `make install`. Now `ocamlmgw64`
+   only contains OCaml and the OPAM executables (NOT the build dependencies for
+   OPAM).
 5. Install NSIS, grab `nsisunz.dll` somewhere on the interwebs and put it NSIS's
    `Plugins` directory.
-6. Change your PATH so that ocaml is /usr/bin/ocaml (cygwin's ocaml) and
-   flexlink is /usr/bin/flexlink (cygwin's flexlink)
-6. Download opam; `./configure --prefix=/cygdrive/c/ocamlmgw/`; `make lib-ext`;
-   `make`; `make install`.
 6. In the `ocaml-installer` directory (i.e. this repo), run `make`. This should
    create a variety of files:
     * `version.nsh`, a NSIS header file that is generated to contain the freshly

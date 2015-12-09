@@ -35,8 +35,8 @@
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "installer-logo.bmp"
 !define MUI_ICON "ocaml-icon.ico"
-!define CYGWIN_URL "http://cygwin.com/setup-x86.exe"
-!define ROOT_DIR "c:\ocamlmgw" ; the directory where your binary dist of ocaml lives
+!define CYGWIN_URL "http://cygwin.com/setup-x86_64.exe"
+!define ROOT_DIR "c:\ocamlmgw64" ; the directory where your binary dist of ocaml lives
 
 !define MULTIUSER_EXECUTIONLEVEL Highest
 
@@ -49,16 +49,16 @@
 !include "ReplaceInFile.nsh"
 
 Name "OCaml"
-OutFile "ocaml-${MUI_VERSION}-i686-mingw64-installer${INSTALLER_VERSION}-opam.exe"
+OutFile "ocaml-${MUI_VERSION}-x86_64-mingw64-installer${INSTALLER_VERSION}-opam.exe"
 InstallDir "C:\${MUI_PRODUCT}"
 
 !define MUI_WELCOMEPAGE_TITLE "Welcome to the OCaml setup for windows."
 !define MUI_WELCOMEPAGE_TEXT "This wizard will install OCaml ${MUI_VERSION}, \
 as well as opam (package management tool) and flexdll (prerequisite for \
 compiling native code).$\n$\n\
-The installer can install Cygwin, a Unix layer on top of windows. This is required if you want to \
-perform native compilation or use opam. If you already have Cygwin, this wizard \
-will just launch Cygwin's setup.exe with the right packages pre-checked, so \
+The installer can install Cygwin64, a Unix layer on top of windows. This is required if you want to \
+perform native compilation or use opam. If you already have Cygwin64, this wizard \
+will just launch Cygwin's setup-x86_64.exe with the right packages pre-checked, so \
 that all you have to do is click through the wizard."
 !define MUI_LICENSEPAGE_TEXT_TOP "OCaml is distributed under a modified QPL license."
 !define MUI_LICENSEPAGE_TEXT_BOTTOM "You must agree with the terms of the license below before installing OCaml."
@@ -66,7 +66,7 @@ that all you have to do is click through the wizard."
 !define MUI_FINISHPAGE_TITLE "Congratulations! You have installed OCaml"
 !define MUI_FINISHPAGE_TEXT "You can now play with OCaml. Start menu entries and \
   desktop shortcuts have been created. $\n$\n\
-  - If you installed Cygwin, there should be a $\"Cygwin Terminal$\" shortcut on your \
+  - If you installed Cygwin64, there should be a $\"Cygwin 64 Terminal$\" shortcut on your \
     desktop. You can open up a shell, and use opam, or ocamlopt from the \
     command line.$\n$\n\
   Enjoy!"
@@ -175,8 +175,8 @@ Section "OCaml" SecOCaml
   SetOutPath "$INSTDIR\bin"
 
   File "flexlink\flexlink.exe"
-  File "flexlink\flexdll_mingw.o"
-  File "flexlink\flexdll_initer_mingw.o"
+  File "flexlink\flexdll_mingw64.o"
+  File "flexlink\flexdll_initer_mingw64.o"
 
   SetOutPath "$INSTDIR"
 
@@ -187,17 +187,11 @@ Section "OCaml" SecOCaml
   File /r ${ROOT_DIR}\lib
 
   ${If} $MultiUser.InstallMode == "AllUsers"
-    ; This is for the OCamlWin thing
-    WriteRegStr HKLM "Software\Objective Caml" "InterpreterPath" "$INSTDIR\bin\ocaml.exe"
-
     WriteRegStr HKLM "Software\OCaml" "" $INSTDIR
     ; We want to overwrite that one anyway for the new setup to work properly.
     WriteRegStr HKLM ${env_all} "OCAMLLIB" "$INSTDIR\lib"
     ${EnvVarUpdate} $0 "PATH" "P" "HKLM" "$INSTDIR\bin"
   ${ElseIf} $MultiUser.InstallMode == "CurrentUser"
-     ; This is for the OCamlWin thing
-    WriteRegStr HKCU "Software\Objective Caml" "InterpreterPath" "$INSTDIR\bin\ocaml.exe"
-
     WriteRegStr HKCU "Software\OCaml" "" $INSTDIR
     ; We want to overwrite that one anyway for the new setup to work properly.
     WriteRegStr HKCU ${env_current} "OCAMLLIB" "$INSTDIR\lib"
@@ -246,12 +240,12 @@ Section "OCaml" SecOCaml
 SectionEnd
 
 Section "Cygwin" SecCygwin
-  ${If} ${FileExists} "$DESKTOP\cygwin-setup.exe"
+  ${If} ${FileExists} "$DESKTOP\cygwin-setup-x86_64.exe"
     MessageBox MB_YESNO "There already is a file called cygwin-setup.exe on your \
       desktop.$\nOverwrite?" IDNO end
   ${EndIf}
 
-  NSISdl::download ${CYGWIN_URL} "$DESKTOP\cygwin-setup.exe"
+  NSISdl::download ${CYGWIN_URL} "$DESKTOP\cygwin-setup-x86_64.exe"
 
   Pop $0
   StrCmp $0 "success" ok
@@ -260,11 +254,9 @@ Section "Cygwin" SecCygwin
     DetailPrint "$0"
   ok:
 
-  ; We used to have --site=http://cygwin.cict.fr but since the mirror list
-  ; changes quite often, it's safer to let the user pick their preferred mirror.
   ExecWait "$DESKTOP\cygwin-setup.exe --quiet-mode \
     --local-package-dir=$TEMP\cygwin\ \
-    --packages=curl,make,mingw64-i686-gcc-g++,mingw64-i686-gcc-core,mingw64-i686-gcc,patch,rlwrap,libreadline6,diffutils,wget,vim \
+    --packages=curl,make,mingw64-x86_64-gcc-g++,mingw64-i686-gcc-core,mingw64-i686-gcc,patch,rlwrap,libreadline6,diffutils,wget,vim \
     >NUL 2>&1"
 
   end:
@@ -273,11 +265,11 @@ SectionEnd
 
 LangString DESC_SecOCaml ${LANG_ENGLISH} "This contains the main OCaml \
   distribution, including all OCaml compilers, ocamlbuild, ocamldoc, \
-  opam, and flexlink for the mingw toolchain."
+  opam, and flexlink for the mingw64 toolchain."
 LangString DESC_SecCygwin ${LANG_ENGLISH} "Cygwin provides a Unix-like layer. \
   This is required if you want to run scripts such as odb, or perform \
-  native-code compilation. This will download Cygwin's setup.exe to your desktop \
-  as cygwin-setup.exe"
+  native-code compilation. This will download Cygwin64's setup-x86_64.exe to your desktop \
+  as cygwin-setup-x86_64.exe"
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecOCaml} $(DESC_SecOCaml)
@@ -297,8 +289,8 @@ Section "Uninstall"
   ; The rationale is that users might install this in their Program Files
   ; directory, so we can't blindy remove the INSTDIR...
   Delete "$INSTDIR\bin\flexlink.exe"
-  Delete "$INSTDIR\bin\flexdll_initer_mingw.o"
-  Delete "$INSTDIR\bin\flexdll_mingw.o"
+  Delete "$INSTDIR\bin\flexdll_initer_mingw64.o"
+  Delete "$INSTDIR\bin\flexdll_mingw64.o"
   ; Will remove only if the directory is empty
   RMDir "$INSTDIR\bin"
 
@@ -318,12 +310,6 @@ Section "Uninstall"
 
   ${If} $MultiUser.InstallMode == "AllUsers"
     ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\bin"
-
-    ; This is for the OCamlWin thing
-    ReadRegStr $R1 HKLM "Software\Objective Caml" "InterpreterPath"
-    ${Unless} $R1 != "$INSTDIR\bin\ocaml.exe"
-      DeleteRegValue HKLM "Software\Objective Caml" "InterpreterPath"
-    ${EndUnless}
 
     ; OCAMLLIB
     ReadRegStr $R1 HKLM ${env_all} "OCAMLLIB"

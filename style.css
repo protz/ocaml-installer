@@ -28,12 +28,18 @@ a {
      -moz-box-shadow: 0 1px 2px #CCE0FF;
      -o-box-shadow: 0 1px 2px #CCE0FF;
       box-shadow: 0 1px 2px #CCE0FF;
+
+  max-width: 800px;
 }
 
 header {
   font-style: italic;
   text-align: right;
   margin-bottom: 1em;
+}
+
+h2 {
+  margin-top: 3ex;
 }
 
 header h1 {
@@ -50,10 +56,16 @@ section section {
   padding-left: 1em;
 }
 
-.myEyesHurt {
-  font-size: x-large;
+.main-link {
   font-weight: bold;
-  margin-top: 1em;
+  border: 2px solid;
+  padding: 1ex;
+}
+
+.main-link:hover {
+  background-color: #3875D7;
+  color: white;
+  text-decoration: none;
 }
 
 .myEyesHurt.s1 {

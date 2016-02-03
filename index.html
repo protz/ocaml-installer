@@ -44,25 +44,83 @@
       <section>
         <h2>Introduction</h2>
         <p>
-          There are several ways to compile and distribute OCaml on Windows.
-          This installer will:
-          <ul>
-            <li>install OCaml and <tt>opam</tt> (both native 64-bit executables)</li>
-            <li>(optional) launch the cygwin64 setup with the right packages
-              pre-configured so that you have a working OCaml development
-              environment.</li>
-          </ul>
+          There are <a href="https://github.com/ocaml/ocaml/blob/trunk/README.win32.adoc">
+          several ways</a> to compile and distribute OCaml on Windows.
+        This installer distributes the <b>native, mingw-w64, 64-bit</b> port of
+        OCaml along with a <b>native, 64-bit OPAM</b>. The installer offers to
+        install Cygwin so that you get 1) the proper compiler toolchain needed
+        to use <tt>ocamlopt</tt> and 2) Unix tools such as <tt>make</tt>,
+        <tt>bash</tt> and others, which most packages depend on.
         </p>
-        <h3>The full story</h3>
+        <h3>Quick start guide</h3>
+        <p>
+        <ul>
+          <li>open a Cygwin terminal, then <tt>opam init</tt>
+          <li>decline the offer to customize your <tt>~/.bash_profile</tt>;
+          instead, add the following into your <tt>~/.bashrc</tt>:
+<pre>
+export CAML_LD_LIBRARY_PATH=$HOME/.opam/system/lib/stublibs:/cygdrive/c/OCaml/lib/stublibs
+export MANPATH=$HOME/.opam/system/man:$MANPATH
+export PATH=$HOME/.opam/system/bin:$PATH
+</pre>
+          <li>you probably want: <tt>opam install depext depext-cygwinports</tt>
+          <li>sample package installation: <tt>opam depext sqlite3 && opam
+            install sqlite3</tt>
+        </ul>
+        </p>
+        <h3>If you already have Cygwin64 installed</h3>
+        <p>
+        Then, skip the Cygwin part of the installer, and make sure you have the
+        following packages: <tt>wget, make, automake, m4,
+          mingw64-x86_64-gcc-core,
+          mingw64-x86_64-gcc-pkg-config,
+          patch, rlwrap, libreadline6, diffutils</tt>
+        </p>
+        <h3>Troubleshooting</h3>
+        <p>
+        <ul>
+          <li>If OPAM complains about curl, this is a lie, it actually needs
+          <tt>wget</tt>
+          <li>make sure <tt>OCAMLLIB</tt> is set using a Windows-style path
+            (e.g. <tt>C:/OCaml/lib</tt>)
+          <li>the output of <tt>ocamlopt -config</tt> should contain
+            <tt>native_c_compiler: x86_64-w64-mingw32-gcc …</tt>; if that's not
+            the case, then <tt>which ocamlopt</tt> will help you figure out
+            what's going on
+          <li>if you get errors with <tt>depext</tt>, check that OPAM's
+            <tt>bin</tt> folder is in your path, and check that
+            <tt>x86_64-w64-mingw32-pkg-config</tt> is installed
+        </ul>
+        </p>
+        <h2>Download</h2>
+        <p>
+          The installer has been tested on Windows XP, Windows 7, Windows 8.
+        </p>
+        <a class="main-link"
+          href="http://gallium.inria.fr/~protzenk/caml-installer/ocaml-4.02.3-x86_64-mingw64-installer4-opam.exe">
+          Installer for 64-bit OCaml 4.02.3 + OPAM
+        </a>
+        <h3>Other versions</h3>
+        <ul>
+          <li>
+            <a
+              href="http://gallium.inria.fr/~protzenk/caml-installer/ocaml-4.02.3-i686-mingw64-installer4-opam.exe">
+              32-bit OCaml 4.02.3 + Cygwin32 OPAM
+            </a> (Note: <tt>opam install merlin</tt> works with this one, but
+            not <tt>depext-cygports</tt>. This is a stock OPAM.)
+          </li>
+          <li>
+            <a
+              href="http://gallium.inria.fr/~protzenk/caml-installer/ocaml-4.02.3-i686-mingw64-installer4.exe">
+              32-bit OCaml 4.02.3 + findlib + batteries
+            </a>
+          </li>
+          <li><a href="http://gallium.inria.fr/~protzenk/caml-installer/">other old (minor) versions</a></li>
+        </ul>
+        <h2>The full story</h2>
         <p>
         See <a href="http://gallium.inria.fr/~scherer/gagallium/the-ocaml-installer-for-windows">my
-        entry on the Gagallium blog</a> for the full details. Long story
-        short: you get windows-native, 64-bit compilers that use the toolchain
-        from the <tt>mingw64</tt> project. You can hit <tt>opam init</tt>, as
-        well as <tt>opam install depext depext-cygwinports</tt>, then do stuff
-        like <tt>opam depext ssl</tt> or <tt>opam install fstar mezzo
-          merlin</tt>. Not all packages work, sadly. You may want to add
-        <tt>c:\users\...\opam~1\system\bin</tt> to your system path.
+        entry on the Gagallium blog</a> for the (outdated) details.
         </p>
         <ul>
           <li>The compiler binaries (<tt>ocamlc</tt>, <tt>ocamlopt</tt>, etc.)
@@ -88,44 +146,7 @@
           openssl gets installed into your Cygwin setup for the right toolchain.
           </li>
         </ul>
-        <p>
-          If you already have Cygwin installed, just make sure the following
-          packages are present: curl, make, mingw64-x86_64-gcc-g++,
-          mingw64-x86_64-gcc, patch, rlwrap, libreadline6, diffutils. Some of
-          these are required for odb to work properly.
-        </p>
-        <h2>Download</h2>
-        <p>
-          The installer has been tested on Windows XP, Windows 7, Windows 8.
-        </p>
-        <div class="myEyesHurt">
-          <a
-            href="http://gallium.inria.fr/~protzenk/caml-installer/ocaml-4.02.3-x86_64-mingw64-installer4-opam.exe">
-            Installer for 64-bit OCaml 4.02.3 + OPAM
-          </a>
-        </div>
-        <h3>Other versions</h3>
-        <ul>
-          <li>
-            <a
-              href="http://gallium.inria.fr/~protzenk/caml-installer/ocaml-4.02.3-i686-mingw64-installer4-opam.exe">
-              32-bit OCaml 4.02.3 + Cygwin32 OPAM
-            </a> (Note: <tt>opam install menhir</tt> works with this one, but
-            not <tt>depext-cygports</tt>. This is a stock OPAM.)
-          </li>
-          <li>
-            <a
-              href="http://gallium.inria.fr/~protzenk/caml-installer/ocaml-4.02.3-i686-mingw64-installer4.exe">
-              32-bit OCaml 4.02.3 + findlib + batteries
-            </a>
-          </li>
-          <li><a href="http://gallium.inria.fr/~protzenk/caml-installer/">other old (minor) versions</a></li>
-        </ul>
-        <h2>Changes</h2>
-        <ul>
-          <li>Package a windows-native port of opam; stop packaging all the rest
-          (ocamlwin, emacs, findlib, batteries, etc.)</li>
-        </ul>
+
         <h2>Known issues</h2>
         <ul>
           <li>Most antivirus software will flag the OCaml installer as being a

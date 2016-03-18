@@ -5,7 +5,7 @@ These are the source files if you want to rebuild the installer. If you just
 want to download the installer, see the "website" link near the top of the
 page.
 
-The installer now uses the "official" toolchain, namely Mingw64 living in a
+The installer now uses the "official" toolchain, namely 64-bit Mingw64 living in a
 Cygwin environment. The current version of this installer works with OCaml 4.0;
 if you want to compile an older version of OCaml, you need to switch to and older
 revision.
@@ -13,10 +13,9 @@ revision.
 Requirements
 ------------
 
-* Cygwin with the mingw64 compiler suite, 32bit version (i686-w64-mingw32).
+* Cygwin with the mingw64 compiler suite, 64bit version (x86_64-w64-mingw32).
 * FlexDLL (at least 0.29)
 * NSIS (the special build that uses 8k strings)
-* the NSISunz plugin for NSIS, that lives somewhere on the NSIS wiki
 
 Instructions for building an new version of the installer
 ---------------------------------------------------------
@@ -33,14 +32,14 @@ Simplified instructions.
    resulting installer ships the right version of flexdll (optional,
    recommended).
 2. Grab a copy of the OCaml sources, and keep the default install path
-   (`c:\ocamlmgw`), this will make your life easier.
+   (`c:\ocamlmgw64`), this will make your life easier.
 3. Follow the instructions in `README.Win32`, section "MinGW64/Cygwin". Try to
    compile OCaml. Swear. Try again. Grab a tea. Succeed. Be happy.
 4. Make sure `/cygdrive/c/ocamlmgw64/bin` is in your path.
 3. Clone camlp4, apply the
    [patch](https://github.com/ocaml/camlp4/issues/41#issuecomment-55229048) for
    Windows, `configure` `make all` and `make install`
-3. Make a copy of this repository into `ocamlmgw64-fresh`.
+3. `cp -R ocamlmgw64 ocamlmgw64-fresh`.
 6. Checkout [David Allsop's OPAM fork](https://github.com/dra27/opam/tree/windows);
    cherry-pick the `windows-temp` commit (single commit). Apply the
    `patch-opam-dra27` file (forces wget + and makes opam init point to
@@ -55,8 +54,6 @@ Simplified instructions.
 6. Move `ocamlmgw64-fresh` to `ocamlmgw64` and `make install`. Now `ocamlmgw64`
    only contains OCaml and the OPAM executables (NOT the build dependencies for
    OPAM).
-5. Install NSIS, grab `nsisunz.dll` somewhere on the interwebs and put it NSIS's
-   `Plugins` directory.
 6. In the `ocaml-installer` directory (i.e. this repo), run `make`. This should
    create a variety of files:
     * `version.nsh`, a NSIS header file that is generated to contain the freshly

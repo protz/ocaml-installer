@@ -52,49 +52,15 @@
         to use <tt>ocamlopt</tt> and 2) Unix tools such as <tt>make</tt>,
         <tt>bash</tt> and others, which most packages depend on.
         </p>
-        <h3>Quick start guide</h3>
-        <p>
-        <ul>
-          <li>open a Cygwin terminal, then <tt>opam init</tt>
-          <li>decline the offer to customize your <tt>~/.bash_profile</tt>;
-          instead, add the following into your <tt>~/.bashrc</tt>:
-<pre>
-export CAML_LD_LIBRARY_PATH=$HOME/.opam/system/lib/stublibs:/cygdrive/c/OCaml/lib/stublibs
-export MANPATH=$HOME/.opam/system/man:$MANPATH
-export PATH=$HOME/.opam/system/bin:$PATH
-</pre>
-          <li>you probably want: <tt>opam install depext depext-cygwinports</tt>
-          <li>sample package installation: <tt>opam depext sqlite3 && opam
-            install sqlite3</tt>
-        </ul>
-        </p>
-        <h3>If you already have Cygwin64 installed</h3>
-        <p>
-        Then, skip the Cygwin part of the installer, and make sure you have the
-        following packages: <tt>wget, make, automake, m4,
-          mingw64-x86_64-gcc-core,
-          mingw64-x86_64-pkg-config,
-          patch, rlwrap, libreadline (7 is the latest), diffutils</tt>
-        </p>
-        <h3>Troubleshooting</h3>
-        <p>
-        <ul>
-          <li>If OPAM complains about curl, this is a lie, it actually needs
-          <tt>wget</tt>
-          <li>make sure <tt>OCAMLLIB</tt> is set using a Windows-style path
-            (e.g. <tt>C:/OCaml/lib</tt>)
-          <li>the output of <tt>ocamlopt -config</tt> should contain
-            <tt>native_c_compiler: x86_64-w64-mingw32-gcc …</tt>; if that's not
-            the case, then <tt>which ocamlopt</tt> will help you figure out
-            what's going on
-          <li>if you get errors with <tt>depext</tt>, check that OPAM's
-            <tt>bin</tt> folder is in your path, and check that
-            <tt>x86_64-w64-mingw32-pkg-config</tt> is installed
-        </ul>
-        </p>
+        <h2>Instructions!</h2>
+        Getting everything to work right can be tricky. Please <a
+         href="https://github.com/protz/ocaml-installer/wiki">follow
+         the instructions on the wiki</a> before even downloading the installer!
         <h2>Download</h2>
         <p>
           The installer has been tested on Windows XP, Windows 7, Windows 8.
+          Have you run the sanity checks from the <a href="https://github.com/protz/ocaml-installer/wiki">
+          instructions on the wiki</a>? In that case you may proceed.
         </p>
         <a class="main-link"
           href="http://gallium.inria.fr/~protzenk/caml-installer/ocaml-4.02.3-x86_64-mingw64-installer4-opam.exe">

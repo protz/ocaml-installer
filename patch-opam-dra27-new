@@ -1,0 +1,47 @@
+diff --git a/src/Makefile b/src/Makefile
+index e0e383a..5dad175 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -15,8 +15,8 @@ all:
+ 
+ # --
+ 
+-OCAMLFLAGS = -g -w @a-3-4-9-32-41-44-45-48
+-OCAMLLDFLAGS = -g -w @a-4-9-32-41-44-45
++OCAMLFLAGS = -g 
++OCAMLLDFLAGS = -g 
+ ifeq ($(OCAML_4),true)
+   OCAMLFLAGS += -bin-annot
+   OCAMLLDFLAGS += -bin-annot
+diff --git a/src/core/opamGlobals.ml b/src/core/opamGlobals.ml
+index 4c10ebe..ff4f86a 100644
+--- a/src/core/opamGlobals.ml
++++ b/src/core/opamGlobals.ml
+@@ -362,7 +362,7 @@ let get_external_solver () =
+   OpamMisc.Option.default default_external_solver !external_solver
+ 
+ let default_repository_name    = "default"
+-let default_repository_address = "https://opam.ocaml.org"
++let default_repository_address = "https://github.com/fdopen/opam-repository-mingw.git"
+ 
+ let search_files = ref ["findlib"]
+ 
+diff --git a/src/core/opamSystem.ml b/src/core/opamSystem.ml
+index b2a0e8d..006c877 100644
+--- a/src/core/opamSystem.ml
++++ b/src/core/opamSystem.ml
+@@ -689,12 +689,10 @@ let download_command =
+     match OpamGlobals.curl_command with
+     | Some cmd -> curl cmd
+     | None ->
+-      if command_exists "curl" then
+-        curl "curl"
+-      else if command_exists "wget" then
++      if command_exists "wget" then
+         wget
+       else
+-        internal_error "Cannot find curl nor wget."
++        internal_error "Cannot find wget."
+   )
+ 
+ (*

@@ -44,11 +44,13 @@ Simplified instructions.
    cherry-pick the `windows-temp` commit (single commit). Apply the
    `patch-opam-dra27` file (forces wget + and makes opam init point to
    https://github.com/fdopen/opam-repository-mingw by default).
-6. Try to install the dependencies needed for opam. Either from
-   [Thomas' script](https://github.com/braibant/ocaml-windows-bootstrap) or possibly
-   from the new targets of `dra27/opam` (?). Note to self: Thomas' script
-   hardcodes i686 instead of x86_64 in quite a few places. Do a
-   search-and-replace for that and also `s/ocamlmgw/ocamlmgw64`.
+6. All the dependencies can be installed via opam. For `jsonm`: do `rm
+   ~/.opam/~/.opam/repo/default/packages/jsonm/jsonm.0.9.1/files/jsonm.install`.
+   Use [Thomas' script](https://github.com/braibant/ocaml-windows-bootstrap)
+   just for `dose3`; manually move things from `c:/ocamlmgw64/` to
+   `~/.opam/system/lib`. Note to self: Thomas' script hardcodes i686 instead of
+   x86_64 in quite a few places. Do a search-and-replace for that and also
+   `s/ocamlmgw/ocamlmgw64`.
 6. Look into Thomas' script to figure out which variables to export to build
    opam correctly. Build opam.
 6. Move `ocamlmgw64-fresh` to `ocamlmgw64` and `make install`. Now `ocamlmgw64`
